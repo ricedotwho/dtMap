@@ -38,7 +38,7 @@ object Key {
             if (witherKeyPickup || bloodKeyPickup) DtMap.mc.player?.playSound(KEY_SOUND, C3Other.keyPickupPlingVolume, 1.0f)
         }
 
-        LevelRenderEvents.COLLECT_SUBMITS.register { ctx ->
+        LevelRenderEvents.AFTER_TRANSLUCENT_TERRAIN.register { ctx ->
             if (SoloClear.isSoloClearing()) return@register
 
             currentKey?.let {

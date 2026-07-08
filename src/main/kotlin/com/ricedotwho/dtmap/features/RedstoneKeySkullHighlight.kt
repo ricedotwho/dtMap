@@ -38,7 +38,7 @@ object RedstoneKeySkullHighlight {
             key = null
         }
 
-        LevelRenderEvents.END_MAIN.register { ctx ->
+        LevelRenderEvents.AFTER_TRANSLUCENT_TERRAIN.register { ctx ->
             if (!SoloClear.hack(C3Other.redstoneKeySkullHighlight)) return@register
 
             key?.let { key ->

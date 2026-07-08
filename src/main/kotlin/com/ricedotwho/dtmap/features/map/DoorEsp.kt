@@ -23,7 +23,7 @@ object DoorEsp {
     var doorBlockPositions = mutableSetOf<BlockPos>()
 
     fun register() {
-        LevelRenderEvents.COLLECT_SUBMITS.register(DoorRenderer)
+        LevelRenderEvents.AFTER_TRANSLUCENT_TERRAIN.register(DoorRenderer)
         ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register { _, _ ->
             witherKeys = 0
             bloodKey = false
@@ -76,16 +76,16 @@ object DoorEsp {
         }
     }
 
-    private val DoorRenderer = LevelRenderEvents.CollectSubmits { context ->
+    private val DoorRenderer = LevelRenderEvents.AfterTranslucentTerrain { context ->
         if (SoloClear.isSoloClearing()) {
             if (C3Other.soloClearingDoorEsp) SoloClear.renderDoorEsp(context)
-            return@CollectSubmits
+            return@AfterTranslucentTerrain
         }
 
-        if (C2Esp.doorEsp == 0) return@CollectSubmits
+        if (C2Esp.doorEsp == 0) return@AfterTranslucentTerrain
 
         val playerRoom = DungeonMap.roomPlayerInNoBoundsCheck()?.owner
-        if (C2Esp.doorEsp > 1 && (playerRoom == null || !playerRoom.rushRoom)) return@CollectSubmits
+        if (C2Esp.doorEsp > 1 && (playerRoom == null || !playerRoom.rushRoom)) return@AfterTranslucentTerrain
 
         val fairy = Scan.rooms.find { room -> room.type == Room.Type.FAIRY }
         Scan.doors.forEach {
