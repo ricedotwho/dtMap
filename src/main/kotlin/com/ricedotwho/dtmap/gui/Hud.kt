@@ -10,6 +10,7 @@ import imgui.ImGuiIO
 import imgui.flag.ImGuiWindowFlags
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.input.MouseButtonEvent
@@ -169,7 +170,7 @@ object Hud : ImGuiHandler.RenderInterface("DtMapHud") {
 
     fun register() {
         components.forEach(::load)
-        HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("dtmap", "hud"), Renderer)
+        HudElementRegistry.attachElementBefore(VanillaHudElements.SLEEP, Identifier.fromNamespaceAndPath("dtmap", "hud"), Renderer)
     }
 
     private var selected: Component? = null
