@@ -34,11 +34,14 @@ object C2Esp {
     @Setting("Mimic", lineBefore = true)
     val mimic = "Mimic"
 
+    @Setting("Mimic ESP")
+    var mimicESP = false
+
     @Setting("Legit")
     var mimicLegit = true
 
     @Setting("Fill")
-    var mimicEspFillColor = Color.RED.opacity(0.0f)
+    var mimicEspFillColor = Color.RED.opacity(0.4f)
 
     @Setting("Outline")
     var mimicEspOutlineColor = Color.RED.opacity(0.0f)

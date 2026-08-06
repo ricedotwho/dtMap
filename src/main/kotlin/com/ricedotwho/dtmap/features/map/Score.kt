@@ -62,7 +62,7 @@ object Score : Hud.Component("Score", 0.1, 0.5, Hud.Type.Dungeon, staticRenderCo
 
         val line1 = "$secrets   $unfoundSecrets$scoreText"
 
-        val line2 = "${if (Scoreboard.stats.deaths > 0) "§7D: §c${Scoreboard.stats.deaths}   " else ""}${if (!Scoreboard.stats.mimicKilled && Location.dungeonFloor.number >= 6) "§7M: §c✖   " else ""}${if (!Scoreboard.stats.princeKilled && showPrince) "§7P: §c✖   " else ""}${if (Scoreboard.stats.crypts < 5) "§c${Scoreboard.stats.crypts}§7/§a5" else ""}".trim()
+        val line2 = "${if (Scoreboard.stats.deaths > 0) "§7D: §c${Scoreboard.stats.deaths}   " else ""}${if (!Scoreboard.stats.mimicKilled && Location.dungeonFloor.number >= 6) "§7M: §c✖   " else ""}${if (!Scoreboard.stats.princeKilled && showPrince) "§7P: §c✖   " else ""}${if (!Scoreboard.stats.batKilled) "§7B: §c✖   " else ""}${if (Scoreboard.stats.crypts < 5) "§c${Scoreboard.stats.crypts}§7/§a5" else ""}".trim()
 
         val mapSize = DungeonMap.calculateMapSize()
         val size = (mapSize.z * 16 + (mapSize.z - 1) * 4 + C1Map.backgroundSize.toInt() * 2) * if (!forMap) MapRenderer.scale else 1f
@@ -78,7 +78,7 @@ object Score : Hud.Component("Score", 0.1, 0.5, Hud.Type.Dungeon, staticRenderCo
 
     fun actualExample(context: GuiGraphicsExtractor) {
         context.centeredText(mc.font, "§b10§7-§e49§7-§c55     §a300", 0, 0, Color.WHITE.rgb)
-        context.centeredText(mc.font, "§7D: §c1  §7M: §c✖  §7P: §c✖  §c0§7/§a5", 0, mc.font.lineHeight + 2, Color.WHITE.rgb)
+        context.centeredText(mc.font, "§7D: §c1  §7M: §c✖  §7P: §c✖  §7B: §c✖  §c0§7/§a5", 0, mc.font.lineHeight + 2, Color.WHITE.rgb)
     }
 
     override fun render(context: GuiGraphicsExtractor) {
@@ -92,8 +92,8 @@ object Score : Hud.Component("Score", 0.1, 0.5, Hud.Type.Dungeon, staticRenderCo
     }
 
     override fun offsetBounds(width: Int, height: Int): Pair<Int, Int> =
-        Pair(-(mc.font.width("§7D: §c1  §7M: §c✖  §7P: §c✖  §c0§7/§a5") / 2 * scale).toInt(), 0)
+        Pair(-(mc.font.width("§7D: §c1  §7M: §c✖  §7P: §c✖  §7B: §c✖  §c0§7/§a5") / 2 * scale).toInt(), 0)
 
     override fun bounds(): Pair<Double, Double> =
-        Pair(mc.font.width("§7D: §c0  §7M: §c✖  §7P: §c✖  §c0§7/§a5").toDouble(), mc.font.lineHeight * 2.0 + 2.0)
+        Pair(mc.font.width("§7D: §c0  §7M: §c✖  §7P: §c✖  §7B: §c✖  §c0§7/§a5").toDouble(), mc.font.lineHeight * 2.0 + 2.0)
 }

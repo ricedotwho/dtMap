@@ -17,6 +17,7 @@ object Mimic {
     }
 
     val WorldRender = LevelRenderEvents.AfterTranslucentTerrain { context ->
+        if (!C2Esp.mimicESP) return@AfterTranslucentTerrain
         val chest = Scan.chest ?: return@AfterTranslucentTerrain
 
         if (C2Esp.mimicEspFillColor.alpha > 0) context.drawBlockOverlay(chest, C2Esp.mimicEspFillColor, C2Esp.mimicLegit)

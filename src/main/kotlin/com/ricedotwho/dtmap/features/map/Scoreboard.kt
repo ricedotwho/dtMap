@@ -125,6 +125,7 @@ object Scoreboard {
         var elapsedTime: String = "0s",
         var mimicKilled: Boolean = false,
         var princeKilled: Boolean = false,
+        var batKilled: Boolean = false,
         var puzzleCount: Int = 0,
         var puzzles: MutableList<Puzzle> = mutableListOf()
     ) {
@@ -167,7 +168,7 @@ object Scoreboard {
         }
 
         fun calculateBonusScoreNoPaul(): Int =
-            (if (mimicKilled) 2 else 0) + (if (princeKilled) 1 else 0) + crypts.coerceAtMost(5)
+            (if (mimicKilled) 2 else 0) + (if (princeKilled) 1 else 0) + (if (batKilled) 1 else 0) + crypts.coerceAtMost(5)
 
         fun calculateBonusScore(): Int =
              calculateBonusScoreNoPaul() + calculatePaulScore()
@@ -232,6 +233,11 @@ object Scoreboard {
                 return@register
             }
 
+            if (batRegex.matches(unformatted)) {
+                stats.batKilled = true
+                return@register
+            }
+
             when (partyMessageRegex.find(unformatted)?.groupValues?.get(1)?.lowercase() ?: return@register) {
                 "mimic killed", "mimic slain", "mimic killed!", "mimic dead", "mimic dead!", $$"$skytils-dungeon-score-mimic$" ->
                     stats.mimicKilled = true
@@ -242,6 +248,9 @@ object Scoreboard {
 
                 "blaze done!", "blaze done", "blaze puzzle solved!" ->
                     stats.puzzles.find { it == Puzzle.BLAZE }.let { it?.status = PuzzleStatus.Completed }
+
+                "bat killed", "bat killed!", "bat dead", "bat dead!" ->
+                    stats.batKilled = true
             }
         }
 
@@ -348,6 +357,7 @@ object Scoreboard {
     private val puzzleRegex = Regex("^ (\\w+(?: \\w+)*|\\?\\?\\?): \\[([✖✔✦])] ?(?:\\((\\w+)\\))?$")
     private val partyMessageRegex = Regex("^Party > .*?: (.+)$")
     private val princeRegex = Regex("^A Prince falls\\. \\+1 Bonus Score$")
+    private val batRegex = Regex("^A Bat has been slain\\. \\+1 Bonus Score$")
     private val floorRegex = Regex("The Catacombs \\((\\w+)\\)$")
     private val clearedRegex = Regex("^Cleared: (\\d+)% \\(\\d+\\)$")
 }
