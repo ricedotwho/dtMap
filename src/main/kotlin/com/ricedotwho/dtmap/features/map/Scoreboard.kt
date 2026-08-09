@@ -125,8 +125,7 @@ object Scoreboard {
         var elapsedTime: String = "0s",
         var mimicKilled: Boolean = false,
         var princeKilled: Boolean = false,
-        var batKilled: Int = 0,
-        var batKillers: MutableList<String> = mutableListOf(),
+        var bats: MutableSet<String> = mutableSetOf(),
         var puzzleCount: Int = 0,
         var puzzles: MutableList<Puzzle> = mutableListOf()
     ) {
@@ -169,7 +168,7 @@ object Scoreboard {
         }
 
         fun calculateBonusScoreNoPaul(): Int =
-            (if (mimicKilled) 2 else 0) + (if (princeKilled) 1 else 0) + batKilled.coerceAtMost(5) + crypts.coerceAtMost(5)
+            (if (mimicKilled) 2 else 0) + (if (princeKilled) 1 else 0) + bats.size.coerceAtMost(5) + crypts.coerceAtMost(5)
 
         fun calculateBonusScore(): Int =
              calculateBonusScoreNoPaul() + calculatePaulScore()
@@ -235,7 +234,7 @@ object Scoreboard {
             }
 
             if (batRegex.matches(unformatted)) {
-                stats.batKilled++
+                stats.bats.add(mc.player?.name?.string ?: return@register)
                 return@register
             }
 
@@ -253,9 +252,7 @@ object Scoreboard {
                     stats.puzzles.find { it == Puzzle.BLAZE }.let { it?.status = PuzzleStatus.Completed }
 
                 "bat killed", "bat killed!", "bat dead", "bat dead!" -> {
-                    if (mc.player?.name?.string == name || stats.batKillers.contains(name)) return@register
-                    stats.batKillers.add(name)
-                    stats.batKilled++
+                    stats.bats.add(name)
                 }
             }
         }
