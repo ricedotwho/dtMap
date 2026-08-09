@@ -7,7 +7,7 @@ import java.awt.Color
 
 @Tab("Esp")
 object C2Esp {
-    @Setting("Door Esp", combo = ["No", "Shit", "Good", "Legit"])
+    @Setting("Door Esp", combo = ["Off", "Bad", "Good", "Legit"])
     var doorEsp = 0
 
     @Setting("Width", min = 0.0, max = 25.0)

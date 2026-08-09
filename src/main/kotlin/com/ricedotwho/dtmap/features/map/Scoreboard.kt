@@ -125,7 +125,8 @@ object Scoreboard {
         var elapsedTime: String = "0s",
         var mimicKilled: Boolean = false,
         var princeKilled: Boolean = false,
-        var batKilled: Boolean = false,
+        var batKilled: Int = 0,
+        var batKillers: MutableList<String> = mutableListOf(),
         var puzzleCount: Int = 0,
         var puzzles: MutableList<Puzzle> = mutableListOf()
     ) {
@@ -168,7 +169,7 @@ object Scoreboard {
         }
 
         fun calculateBonusScoreNoPaul(): Int =
-            (if (mimicKilled) 2 else 0) + (if (princeKilled) 1 else 0) + (if (batKilled) 1 else 0) + crypts.coerceAtMost(5)
+            (if (mimicKilled) 2 else 0) + (if (princeKilled) 1 else 0) + batKilled.coerceAtMost(5) + crypts.coerceAtMost(5)
 
         fun calculateBonusScore(): Int =
              calculateBonusScoreNoPaul() + calculatePaulScore()
@@ -234,23 +235,28 @@ object Scoreboard {
             }
 
             if (batRegex.matches(unformatted)) {
-                stats.batKilled = true
+                stats.batKilled++
                 return@register
             }
 
-            when (partyMessageRegex.find(unformatted)?.groupValues?.get(1)?.lowercase() ?: return@register) {
+            var match = partyMessageRegex.find(unformatted)
+            var name = match?.groupValues?.get(2)?.lowercase() ?: return@register
+            when (match.groupValues[3].lowercase()) {
                 "mimic killed", "mimic slain", "mimic killed!", "mimic dead", "mimic dead!", $$"$skytils-dungeon-score-mimic$" ->
                     stats.mimicKilled = true
 
                 // amazing work LN, thank you for Prince Regicided, I didn't even know that was a word...
-                "prince killed", "prince slain", "prince killed!", "prince dead", "prince dead!", "Prince Regicided!", $$"$skytils-dungeon-score-prince$" ->
+                "prince killed", "prince slain", "prince killed!", "prince dead", "prince dead!", "prince regicided!", $$"$skytils-dungeon-score-prince$" ->
                     stats.princeKilled = true
 
                 "blaze done!", "blaze done", "blaze puzzle solved!" ->
                     stats.puzzles.find { it == Puzzle.BLAZE }.let { it?.status = PuzzleStatus.Completed }
 
-                "bat killed", "bat killed!", "bat dead", "bat dead!" ->
-                    stats.batKilled = true
+                "bat killed", "bat killed!", "bat dead", "bat dead!" -> {
+                    if (mc.player?.name?.string == name || stats.batKillers.contains(name)) return@register
+                    stats.batKillers.add(name)
+                    stats.batKilled++
+                }
             }
         }
 
@@ -355,7 +361,7 @@ object Scoreboard {
     private val secretPercentRegex = Regex("^ Secrets Found: ([\\d.]+)%$")
     private val tablistRegex = Regex("^\\[(\\d+)] (?:\\[\\w+] )*(\\w+) .*?\\((\\w+)(?: (\\w+))*\\)$")
     private val puzzleRegex = Regex("^ (\\w+(?: \\w+)*|\\?\\?\\?): \\[([✖✔✦])] ?(?:\\((\\w+)\\))?$")
-    private val partyMessageRegex = Regex("^Party > .*?: (.+)$")
+    private val partyMessageRegex = Regex("Party > (?:\\[(.*?)] )?(.+?): (.+)$")
     private val princeRegex = Regex("^A Prince falls\\. \\+1 Bonus Score$")
     private val batRegex = Regex("^A Bat has been slain\\. \\+1 Bonus Score$")
     private val floorRegex = Regex("The Catacombs \\((\\w+)\\)$")

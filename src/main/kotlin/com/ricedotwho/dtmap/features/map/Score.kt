@@ -62,7 +62,7 @@ object Score : Hud.Component("Score", 0.1, 0.5, Hud.Type.Dungeon, staticRenderCo
 
         val line1 = "$secrets   $unfoundSecrets$scoreText"
 
-        val line2 = "${if (Scoreboard.stats.deaths > 0) "§7D: §c${Scoreboard.stats.deaths}   " else ""}${if (!Scoreboard.stats.mimicKilled && Location.dungeonFloor.number >= 6) "§7M: §c✖   " else ""}${if (!Scoreboard.stats.princeKilled && showPrince) "§7P: §c✖   " else ""}${if (!Scoreboard.stats.batKilled) "§7B: §c✖   " else ""}${if (Scoreboard.stats.crypts < 5) "§c${Scoreboard.stats.crypts}§7/§a5" else ""}".trim()
+        val line2 = "${if (Scoreboard.stats.deaths > 0) "§7D: §c${Scoreboard.stats.deaths}   " else ""}${if (!Scoreboard.stats.mimicKilled && Location.dungeonFloor.number >= 6) "§7M: §c✖   " else ""}${if (!Scoreboard.stats.princeKilled && showPrince) "§7P: §c✖   " else ""}${if (Scoreboard.stats.batKilled < 5) "§c${Scoreboard.stats.batKilled}§7/§a5" else ""}${if (Scoreboard.stats.crypts < 5) "§c${Scoreboard.stats.crypts}§7/§a5" else ""}".trim()
 
         val mapSize = DungeonMap.calculateMapSize()
         val size = (mapSize.z * 16 + (mapSize.z - 1) * 4 + C1Map.backgroundSize.toInt() * 2) * if (!forMap) MapRenderer.scale else 1f
