@@ -22,6 +22,7 @@ import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket
 import net.minecraft.util.Tuple
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.entity.player.PlayerSkin
+import java.awt.Color
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -105,13 +106,13 @@ object Scoreboard {
             if (entity != null) entity!!.yRot else yaw
     }
 
-    enum class DungeonClass {
-        Archer,
-        Berserk,
-        Healer,
-        Mage,
-        Tank,
-        Unknown
+    enum class DungeonClass(val color: Color) {
+        Archer(C1Map.archerColor),
+        Berserk(C1Map.berserkColor),
+        Healer(C1Map.healerColor),
+        Mage(C1Map.mageColor),
+        Tank(C1Map.tankColor),
+        Unknown(C1Map.playerHeadBackground);
     }
 
     data class TabData(

@@ -71,8 +71,26 @@ object C1Map {
     @Setting("Player Head", lineBefore = true)
     val playerHead = "Player Head"
 
+    @Setting("Archer Color")
+    var archerColor = Color(255, 170, 0)
+
+    @Setting("Mage Color")
+    var mageColor = Color(85, 255, 255)
+
+    @Setting("Berserk Color")
+    var berserkColor = Color(255, 85, 85)
+
+    @Setting("Tank Color")
+    var tankColor = Color(0, 170, 0)
+
+    @Setting("Healer Color")
+    var healerColor = Color(255, 85, 255)
+
     @Setting("Outline Color")
     var playerHeadBackground = Color.BLACK.opacity(0.7f)
+
+    @Setting("Use class outline colour")
+    var classOutlineColour = true
 
     @Setting("Own Outline Color")
     var playerHeadOwnBackground = Color.RED.opacity(0.7f)

@@ -94,7 +94,7 @@ object MapRenderer : Hud.Component("Map", 0.1, 0.1, Hud.Type.Dungeon, 1.5f, stat
                 matrices.rotate(Math.toRadians(180.0 + player.mapRenderYaw()).toFloat())
 
                 val self = player.entity == mc.player
-                val backgroundColor = if (self) C1Map.playerHeadOwnBackground else C1Map.playerHeadBackground
+                val backgroundColor = if (C1Map.classOutlineColour) player.clazz.color else if (self) C1Map.playerHeadOwnBackground else C1Map.playerHeadBackground
                 if (C1Map.playerHeadBackgroundSize != 0 && backgroundColor.alpha != 0 && !(self && C1Map.playerMCMapPointer)) {
                     val size = 5 + C1Map.playerHeadBackgroundSize
                     context.fill(-size, -size, size, size, backgroundColor.rgb)
