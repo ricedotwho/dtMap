@@ -9,6 +9,10 @@ import net.minecraft.client.gui.GuiGraphicsExtractor
 import java.awt.Color
 
 object SecretSpawnTimer : Hud.Component("ItemPickup", 0.5, 0.6, Hud.Type.Dungeon, staticRenderConditions = mutableListOf(Hud.Condition.Clear)) {
+    val a: Color = Color(85, 255, 85)
+    val b: Color = Color.decode("#d1a000")
+    val c: Color = Color(255, 85, 85)
+
     fun register() {
         ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register { _, _ ->
             works = false
@@ -31,19 +35,15 @@ object SecretSpawnTimer : Hud.Component("ItemPickup", 0.5, 0.6, Hud.Type.Dungeon
         counter++
     }
 
-    fun updateTime(time: Int) {
-        counter = time
-    }
-
     override fun render(context: GuiGraphicsExtractor) {
         if (!works) return
 
         val away = 20 - counter % 20
 
         val color = when {
-            away < 5 -> Color(85, 255, 85)
-            away < 10 -> Color.decode("#d1a000")
-            else -> Color(255, 85, 85)
+            away < 5 -> a
+            away < 10 -> b
+            else -> c
         }
 
         context.centeredText(DtMap.mc.font, "$away", 0, 0, color.rgb)
