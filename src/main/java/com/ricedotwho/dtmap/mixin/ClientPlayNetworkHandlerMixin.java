@@ -27,12 +27,6 @@ public class ClientPlayNetworkHandlerMixin {
         SoloClear.INSTANCE.openedWindow(clientboundOpenScreenPacket, ci);
     }
 
-    @Inject(method = "handleSystemChat", at = @At("HEAD"), cancellable = true)
-    void handleSystemChat(ClientboundSystemChatPacket packet, CallbackInfo ci) {
-        if (!packet.overlay()) return;
-        RoomSecrets.INSTANCE.onOverlay(packet, ci);
-    }
-
     @Inject(method = "handleEntityEvent", at = @At("TAIL"))
     void handleEntityEvent(ClientboundEntityEventPacket packet, CallbackInfo ci) {
         Mimic.INSTANCE.entityEvent(packet);

@@ -7,8 +7,10 @@ import com.ricedotwho.dtmap.gui.Hud
 import com.ricedotwho.dtmap.gui.Hud.Condition
 import com.ricedotwho.dtmap.utils.Chat
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 import java.awt.Color
@@ -21,7 +23,7 @@ object RoomSecrets : Hud.Component("room-secrets", 0.2, 0.6, Hud.Type.Dungeon, 1
 
     fun register() {
         MapEvents.ON_PLAYER_ENTER_ROOM.register { room ->
-            if (room == null || room.owner == null) {
+            if (room?.owner == null) {
                 currentRoomSecrets = null
             }
         }
@@ -29,20 +31,24 @@ object RoomSecrets : Hud.Component("room-secrets", 0.2, 0.6, Hud.Type.Dungeon, 1
         ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register { _, _ ->
             currentRoomSecrets = null
         }
+
+        ClientReceiveMessageEvents.MODIFY_GAME.register { message, overlay ->
+            if (overlay) onOverlay(message)
+            else message
+        }
     }
 
-    fun onOverlay(packet: ClientboundSystemChatPacket, ci: CallbackInfo) {
-        secretsRegex.find(packet.content.string)?.let { found ->
+    fun onOverlay(message: Component): Component {
+        secretsRegex.find(message.string)?.let { found ->
             currentRoomSecrets = found.groups[1]?.value?.toIntOrNull()
             if (staticRenderConditions.contains(Condition.HideOverlaySecrets)) {
                 currentRoomSecrets?.let {
                     val first = found.groups[1]!!.range.first
-                    ci.cancel()
-                    val content = packet.content.string.substring(0 until first - 2).trimEnd()
-                    mc.connection!!.handleSystemChat(ClientboundSystemChatPacket(Component.literal(content), true))
+                    return Component.literal(message.string.substring(0 until first - 2).trimEnd());
                 }
             }
         }
+        return message
     }
 
     override fun render(context: GuiGraphicsExtractor) {
