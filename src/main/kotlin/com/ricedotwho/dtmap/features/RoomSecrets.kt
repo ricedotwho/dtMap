@@ -32,13 +32,24 @@ object RoomSecrets : Hud.Component("room-secrets", 0.2, 0.6, Hud.Type.Dungeon, 1
             currentRoomSecrets = null
         }
 
-        ClientReceiveMessageEvents.MODIFY_GAME.register { message, overlay ->
+        ClientReceiveMessageEvents.ALLOW_GAME.register { message, overlay ->
             if (overlay) onOverlay(message)
+            true
+        }
+
+        ClientReceiveMessageEvents.MODIFY_GAME.register { message, overlay ->
+            if (overlay) modifyOverlay(message)
             else message
         }
     }
 
-    fun onOverlay(message: Component): Component {
+    fun onOverlay(message: Component) {
+        secretsRegex.find(message.string)?.let { found ->
+            currentRoomSecrets = found.groups[1]?.value?.toIntOrNull()
+        }
+    }
+
+    fun modifyOverlay(message: Component): Component {
         secretsRegex.find(message.string)?.let { found ->
             currentRoomSecrets = found.groups[1]?.value?.toIntOrNull()
             if (staticRenderConditions.contains(Condition.HideOverlaySecrets)) {
