@@ -68,7 +68,7 @@ object Key {
             if (currentKey != null) return@register
 
             currentKey = client.level!!.entitiesForRendering().find {
-                if (it !is ArmorStand || it.yRot == 0F || me.cheater.legitcatmod.features.dungeons.Key.is64(it.yRot)) return@find false
+                if (it !is ArmorStand || it.yRot == 0F || is64(it.yRot)) return@find false
                 val head = it.getItemBySlot(EquipmentSlot.HEAD)
                 if (!head.`is`(Items.PLAYER_HEAD)) return@find false
                 val profile = head.get(DataComponents.PROFILE) ?: return@register
