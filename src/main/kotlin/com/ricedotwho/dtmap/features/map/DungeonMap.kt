@@ -1,11 +1,13 @@
 package com.ricedotwho.dtmap.features.map
 
-import com.ricedotwho.dtmap.DtMap.mc
+import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.utils.skyblock.Island
+import com.odtheking.odin.utils.skyblock.LocationUtils
+import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener
 import com.ricedotwho.dtmap.events.MapEvents
 import com.ricedotwho.dtmap.features.RedstoneKeySkullHighlight
 import com.ricedotwho.dtmap.utils.Chat
 import com.ricedotwho.dtmap.utils.DungeonMessages
-import com.ricedotwho.dtmap.utils.Location
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
@@ -16,13 +18,12 @@ import kotlin.jvm.optionals.getOrNull
 
 object DungeonMap {
     fun register() {
-        MapRenderer
         Score
         Scoreboard
         RedstoneKeySkullHighlight
         SpecialColumn.register()
         Scan.register()
-        Mimic.register()
+        Mimic
         DoorEsp.register()
         Prince.register()
 
@@ -54,7 +55,7 @@ object DungeonMap {
     var shouldScan = false
 
     fun rescanMapItem(packet: ClientboundMapItemDataPacket) {
-        if (Location.dungeonFloor.number == -1 || DungeonMessages.dungeonEnded || (!DungeonMessages.seenDungeonStart && Scoreboard.stats.elapsedTime == "0s")) return
+        if (DungeonListener.floor == null || DungeonMessages.dungeonEnded || (!DungeonMessages.seenDungeonStart && Scoreboard.stats.elapsedTime == "0s")) return
 
         // TODO: fix this to not just assume first map if still broken after seen dungeon start checks
         if (mapID == null) mapID = packet.mapId()
@@ -429,10 +430,10 @@ object DungeonMap {
     }
 
     val ChunkLoad = ClientChunkEvents.Load { _, _ ->
-        if (Location.island == Location.Island.Dungeon) {
+        if (LocationUtils.currentArea == Island.Dungeon && DungeonListener.floor != null) {
             shouldScan = true
             if (mapSize == null) {
-                mapSize = when (Location.dungeonFloor.number) {
+                mapSize = when (DungeonListener.floor!!.floorNumber) {
                     0 -> Vec2i(4, 4)
                     1 -> Vec2i(4, 5)
                     2, 3 -> Vec2i(5, 5)
@@ -461,8 +462,7 @@ object DungeonMap {
             playerOutOfBounds = false
         } else {
             playerRoom?.let { playerRoom ->
-                playerOutOfBounds = playerRoom.owner == null ||
-                        playerRoom.owner.height == null || playerRoom.owner.height!! < player.y ||
+                playerOutOfBounds = playerRoom.owner?.height == null || playerRoom.owner.height!! < player.y ||
                         playerRoom.owner.floorHeight == null || playerRoom.owner.floorHeight!! > player.y
             }
         }
@@ -474,7 +474,7 @@ object DungeonMap {
     }
 
     private fun scanPlayerRoom() {
-        if (Location.island != Location.Island.Dungeon) {
+        if (LocationUtils.currentArea != Island.Dungeon) {
             playerRoom = null
             playerOutOfBounds = false
             return

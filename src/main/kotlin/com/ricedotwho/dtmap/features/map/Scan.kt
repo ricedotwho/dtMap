@@ -1,5 +1,6 @@
 package com.ricedotwho.dtmap.features.map
 
+import com.google.gson.JsonObject
 import com.ricedotwho.dtmap.events.MapEvents
 import com.ricedotwho.dtmap.utils.equalsAny
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents
@@ -188,10 +189,10 @@ object Scan {
         room.rotation = Room.Rotation.entries.dropLast(1).find { rotation ->
             room.tiles.any { component ->
                 BlockPos(component.pos.x + rotation.pos.x, room.height!!, component.pos.z + rotation.pos.z).let { blockPos ->
-                    level.getBlockState(blockPos).block == Blocks.BLUE_TERRACOTTA && (room.tiles.size == 1 || horizontals.all { facing ->
+                    level.getBlockState(blockPos).block == Blocks.DYED_TERRACOTTA.blue && (room.tiles.size == 1 || horizontals.all { facing ->
                         level.getBlockState(
                             blockPos.offset((if (facing.axis == Direction.Axis.X) facing.stepX else 0), 0, (if (facing.axis == Direction.Axis.Z) facing.stepZ else 0))
-                        ).block.equalsAny(Blocks.AIR, Blocks.BLUE_TERRACOTTA)
+                        ).block.equalsAny(Blocks.AIR, Blocks.DYED_TERRACOTTA.blue)
                     }).also { isCorrectClay -> if (isCorrectClay) room.clayPos = blockPos }
                 }
             }
@@ -372,7 +373,7 @@ object Scan {
                     rooms.forEach { it.owner!!.rushRoom = true }
                     Door.Type.WITHER
                 }
-                Blocks.RED_TERRACOTTA -> Door.Type.BLOOD
+                Blocks.DYED_TERRACOTTA.red -> Door.Type.BLOOD
                 else -> Door.Type.NORMAL
             }
 
@@ -408,5 +409,15 @@ object Scan {
                 handleDoor(goingDown, rooms2)
             }
         }
+    }
+
+    fun parseOdinMessage(obj: JsonObject) {
+        if (!obj.has("playerName") || !obj.has("roomName")) return
+        val player = obj["playerName"].asString
+        if (Scoreboard.dungeonTeammates.none { it.name == player }) return
+        val foundSecrets = if (obj.has("foundSecrets")) obj["foundSecrets"].asInt else return
+        val name = obj["roomName"].asString
+        val room = rooms.find { it.data?.name == name } ?: return
+        room.secretsDone = foundSecrets
     }
 }

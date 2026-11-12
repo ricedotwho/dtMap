@@ -1,17 +1,20 @@
 package com.ricedotwho.dtmap.features
 
-import com.ricedotwho.dtmap.DtMap.mc
-import com.ricedotwho.dtmap.config.C3Other
+import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.events.RenderExtractEvent
+import com.odtheking.odin.events.core.EventBus
+import com.odtheking.odin.events.core.on
+import com.odtheking.odin.utils.render.drawWireFrameBox
+import com.ricedotwho.dtmap.config.dungeon.EspConfig
 import com.ricedotwho.dtmap.features.map.DungeonMap
 import com.ricedotwho.dtmap.features.map.Room
 import com.ricedotwho.dtmap.features.map.Scoreboard
-import com.ricedotwho.dtmap.utils.drawBlockOverlay
+import com.ricedotwho.dtmap.utils.Colours
+import com.ricedotwho.dtmap.utils.box
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents
 import net.minecraft.core.BlockPos
 import net.minecraft.world.level.block.Blocks
-import java.awt.Color
 
 object RedstoneKeySkullHighlight {
     private var key: BlockPos? = null
@@ -38,11 +41,13 @@ object RedstoneKeySkullHighlight {
             key = null
         }
 
-        LevelRenderEvents.AFTER_TRANSLUCENT_TERRAIN.register { ctx ->
-            if (!SoloClear.hack(C3Other.redstoneKeySkullHighlight)) return@register
+        EventBus.subscribe(this)
+
+        on<RenderExtractEvent> {
+            if (!SoloClear.hack(EspConfig.redstoneKeyEsp)) return@on
 
             key?.let { key ->
-                ctx.drawBlockOverlay(key, Color.WHITE, false)
+                drawWireFrameBox(key.box(), Colours.WHITE)
             }
         }
     }

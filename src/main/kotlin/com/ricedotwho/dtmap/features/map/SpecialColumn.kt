@@ -1,9 +1,9 @@
 package com.ricedotwho.dtmap.features.map
 
-import com.ricedotwho.dtmap.config.C1Map
-import com.ricedotwho.dtmap.utils.darker
+import com.odtheking.odin.utils.Color
+import com.odtheking.odin.utils.Color.Companion.darker
+import com.ricedotwho.dtmap.config.dungeon.MapConfig
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents
-import java.awt.Color
 
 // this is mostly used to track types of 1x1 rooms & whether the special column is fully scanned so we can mark the
 // map as fully scanned.
@@ -102,17 +102,17 @@ object SpecialColumn {
         if (room.specialTile) {
             val specialSize = mapSizeZ - discoveredFullSpecialColumn + specialColumnRoomCount
             return if (specialSize <= Scoreboard.stats.puzzleCount || discovered1x1s - specialColumnRoomCount >= 2) {
-                arrayOf(C1Map.puzzleRoomColor.darker(C1Map.darkenMultiplier))
+                arrayOf(MapConfig.puzzleRoomColor.darker(MapConfig.darkenMultiplier))
             } else if (opened1x1s.any { it.type == Room.Type.TRAP && !it.specialTile }) {
-                arrayOf(C1Map.puzzleRoomColor.darker(C1Map.darkenMultiplier))
+                arrayOf(MapConfig.puzzleRoomColor.darker(MapConfig.darkenMultiplier))
             } else if (specialSize == Scoreboard.stats.puzzleCount + 1) {
-                arrayOf(C1Map.trapRoomColor.darker(C1Map.darkenMultiplier), C1Map.puzzleRoomColor.darker(C1Map.darkenMultiplier))
+                arrayOf(MapConfig.trapRoomColor.darker(MapConfig.darkenMultiplier), MapConfig.puzzleRoomColor.darker(MapConfig.darkenMultiplier))
             } else if (discovered1x1s - specialColumnRoomCount == 1) {
-                arrayOf(C1Map.trapRoomColor.darker(C1Map.darkenMultiplier), C1Map.puzzleRoomColor.darker(C1Map.darkenMultiplier))
+                arrayOf(MapConfig.trapRoomColor.darker(MapConfig.darkenMultiplier), MapConfig.puzzleRoomColor.darker(MapConfig.darkenMultiplier))
             } else if (opened1x1s.any { it.type == Room.Type.CHAMPION }) {
-                arrayOf(C1Map.championRoomColor.darker(C1Map.darkenMultiplier), C1Map.trapRoomColor.darker(C1Map.darkenMultiplier))
+                arrayOf(MapConfig.championRoomColor.darker(MapConfig.darkenMultiplier), MapConfig.trapRoomColor.darker(MapConfig.darkenMultiplier))
             } else {
-                arrayOf(C1Map.championRoomColor.darker(C1Map.darkenMultiplier), C1Map.trapRoomColor.darker(C1Map.darkenMultiplier), C1Map.puzzleRoomColor.darker(C1Map.darkenMultiplier))
+                arrayOf(MapConfig.championRoomColor.darker(MapConfig.darkenMultiplier), MapConfig.trapRoomColor.darker(MapConfig.darkenMultiplier), MapConfig.puzzleRoomColor.darker(MapConfig.darkenMultiplier))
             }
         }
 
@@ -120,23 +120,23 @@ object SpecialColumn {
         val totalPuzzles = specialColumnRoomCount + nonspecialPuzzles
         if (totalPuzzles == Scoreboard.stats.puzzleCount) {
             return if (opened1x1s.any { it.type == Room.Type.TRAP }) {
-                arrayOf(C1Map.championRoomColor.darker(C1Map.darkenMultiplier))
+                arrayOf(MapConfig.championRoomColor.darker(MapConfig.darkenMultiplier))
             } else if (opened1x1s.any { it.type == Room.Type.CHAMPION }) {
-                arrayOf(C1Map.trapRoomColor.darker(C1Map.darkenMultiplier))
+                arrayOf(MapConfig.trapRoomColor.darker(MapConfig.darkenMultiplier))
             } else {
-                arrayOf(C1Map.championRoomColor.darker(C1Map.darkenMultiplier), C1Map.trapRoomColor.darker(C1Map.darkenMultiplier))
+                arrayOf(MapConfig.championRoomColor.darker(MapConfig.darkenMultiplier), MapConfig.trapRoomColor.darker(MapConfig.darkenMultiplier))
             }
         }
 
         // yellow is generated first so if the special column has puzzles + 1 then the 1x1 on the map is
         // yellow.
         if (!room.specialTile && specialColumnRoomCount == Scoreboard.stats.puzzleCount + 1) {
-            return arrayOf(C1Map.championRoomColor.darker(C1Map.darkenMultiplier))
+            return arrayOf(MapConfig.championRoomColor.darker(MapConfig.darkenMultiplier))
         }
 
         // if we've opened both trap & yellow then we know the 1x1 is a puzzle
         if (opened1x1s.count { it.type == Room.Type.CHAMPION || it.type == Room.Type.TRAP } == 2) {
-            return arrayOf(C1Map.puzzleRoomColor.darker(C1Map.darkenMultiplier))
+            return arrayOf(MapConfig.puzzleRoomColor.darker(MapConfig.darkenMultiplier))
         }
 
         // if we've opened puzzle count + 1 then we're left with just 1 unopened room, and we can guess
@@ -144,19 +144,19 @@ object SpecialColumn {
         // and yellow are open and that returns early)
         if (opened1x1s.size == Scoreboard.stats.puzzleCount + 1) {
             if (opened1x1s.none { it.type == Room.Type.TRAP }) {
-                return arrayOf(C1Map.trapRoomColor.darker(C1Map.darkenMultiplier))
+                return arrayOf(MapConfig.trapRoomColor.darker(MapConfig.darkenMultiplier))
             } else if (opened1x1s.none { it.type == Room.Type.CHAMPION }) {
-                return arrayOf(C1Map.championRoomColor.darker(C1Map.darkenMultiplier))
+                return arrayOf(MapConfig.championRoomColor.darker(MapConfig.darkenMultiplier))
             }
         }
 
-        val result = mutableListOf(C1Map.puzzleRoomColor.darker(C1Map.darkenMultiplier))
+        val result = mutableListOf(MapConfig.puzzleRoomColor.darker(MapConfig.darkenMultiplier))
         if (opened1x1s.none { it.type == Room.Type.TRAP }) {
-            result.add(C1Map.trapRoomColor.darker(C1Map.darkenMultiplier))
+            result.add(MapConfig.trapRoomColor.darker(MapConfig.darkenMultiplier))
         }
 
         if (opened1x1s.none { it.type == Room.Type.CHAMPION }) {
-            result.add(C1Map.championRoomColor.darker(C1Map.darkenMultiplier))
+            result.add(MapConfig.championRoomColor.darker(MapConfig.darkenMultiplier))
         }
 
         return result.toTypedArray()

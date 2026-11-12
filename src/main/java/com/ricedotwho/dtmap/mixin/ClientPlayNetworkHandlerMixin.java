@@ -1,11 +1,11 @@
 package com.ricedotwho.dtmap.mixin;
 
-import com.ricedotwho.dtmap.features.RoomSecrets;
+import com.odtheking.odin.utils.skyblock.Island;
+import com.odtheking.odin.utils.skyblock.LocationUtils;
 import com.ricedotwho.dtmap.features.SoloClear;
 import com.ricedotwho.dtmap.features.map.DungeonMap;
 import com.ricedotwho.dtmap.features.map.Mimic;
 import com.ricedotwho.dtmap.features.map.Scoreboard;
-import com.ricedotwho.dtmap.utils.Location;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.*;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,7 +23,7 @@ public class ClientPlayNetworkHandlerMixin {
 
     @Inject(method = "handleOpenScreen(Lnet/minecraft/network/protocol/game/ClientboundOpenScreenPacket;)V", at = @At("HEAD"), cancellable = true)
     void handleOpenScreen(ClientboundOpenScreenPacket clientboundOpenScreenPacket, CallbackInfo ci) {
-        if (Location.INSTANCE.getIsland() != Location.Island.Dungeon) return;
+        if (LocationUtils.INSTANCE.getCurrentArea() != Island.Dungeon) return;
         SoloClear.INSTANCE.openedWindow(clientboundOpenScreenPacket, ci);
     }
 

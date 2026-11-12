@@ -1,57 +1,62 @@
 package com.ricedotwho.dtmap.features
 
-import com.ricedotwho.dtmap.DtMap.mc
-import com.ricedotwho.dtmap.config.C1Map
+import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.utils.Colors
+import com.odtheking.odin.utils.render.textDim
+import com.odtheking.odin.utils.skyblock.Island
+import com.odtheking.odin.utils.skyblock.LocationUtils
+import com.ricedotwho.dtmap.DtMap.zero
+import com.ricedotwho.dtmap.config.dungeon.MapConfig.legitMode
 import com.ricedotwho.dtmap.features.map.Room
 import com.ricedotwho.dtmap.features.map.Scan
 import com.ricedotwho.dtmap.features.map.Scoreboard
-import com.ricedotwho.dtmap.gui.Hud
-import com.ricedotwho.dtmap.utils.Location
+import com.ricedotwho.dtmap.utils.Colours
 import net.minecraft.client.gui.GuiGraphicsExtractor
-import java.awt.Color
 
-object PuzzleHud : Hud.Component("PuzzleHud", 0.4, 0.4, Hud.Type.Dungeon, staticRenderConditions = mutableListOf(Hud.Condition.BeforeMort, Hud.Condition.Alt)) {
-    override fun render(context: GuiGraphicsExtractor) {
-        if (Location.island != Location.Island.Dungeon) return
+object PuzzleHud {
+    fun render(context: GuiGraphicsExtractor, example: Boolean): Pair<Int, Int> {
+        if (example) {
+            val a = maxOf(
+                context.textDim("Puzzles(3):", 0, 0, Colors.WHITE).first,
+                context.textDim("Tic Tac Toe", 0, mc.font.lineHeight + 2, Colours.GREEN).first,
+                context. textDim("Quiz", 0, (mc.font.lineHeight + 2) * 2, Colours.RED).first,
+                context.textDim("???", 0, (mc.font.lineHeight + 2) * 3, Colours.RED).first
+            )
+            return a to mc.font.lineHeight * 4
+        } else if (LocationUtils.currentArea == Island.Dungeon) {
+            var width = context.textDim("Puzzles(${Scoreboard.stats.puzzleCount}):", 0, 0, Colours.WHITE).first
 
-        context.text(mc.font, "Puzzles(${Scoreboard.stats.puzzleCount}):", 0, 0, Color.WHITE.rgb)
+            var undiscoveredPuzzleCount: Int
 
-        var undiscoveredPuzzleCount: Int
+            if (SoloClear.legit(legitMode)) {
+                Scoreboard.stats.puzzles.forEachIndexed { index, puzzle ->
+                    val height = (index + 1) * (mc.font.lineHeight + 2)
 
-        if (SoloClear.legit(C1Map.legitMode)) {
-            Scoreboard.stats.puzzles.forEachIndexed { index, puzzle ->
-                val height = (index + 1) * (mc.font.lineHeight + 2)
+                    val color = if (puzzle.status == Scoreboard.PuzzleStatus.Completed) Colours.GREEN else Colours.RED
+                    width = maxOf(context.textDim(puzzle.displayName, 0, height, color).first, width)
+                }
 
-                val color = if (puzzle.status == Scoreboard.PuzzleStatus.Completed) Color.GREEN else Color.RED
-                context.text(mc.font, puzzle.displayName, 0, height, color.rgb)
+                undiscoveredPuzzleCount = Scoreboard.stats.puzzleCount - Scoreboard.stats.puzzles.size
+            } else {
+                Scan.puzzles.forEachIndexed { index, puzzle ->
+                    val height = (index + 1) * (mc.font.lineHeight + 2)
+
+                    val color = if (puzzle.state == Room.State.GREEN || puzzle.state == Room.State.CLEARED) Colours.GREEN else Colours.RED
+                    val name = if (puzzle.data == null) "???" else puzzle.data!!.name
+                    width = maxOf(context.textDim(name, 0, height, color).first, width)
+                }
+
+                undiscoveredPuzzleCount = Scoreboard.stats.puzzleCount - Scan.puzzles.size
             }
 
-            undiscoveredPuzzleCount = Scoreboard.stats.puzzleCount - Scoreboard.stats.puzzles.size
+            for (index in Scoreboard.stats.puzzleCount - undiscoveredPuzzleCount until Scoreboard.stats.puzzleCount) {
+                val height = (index + 1) * (mc.font.lineHeight + 2)
+                context.textDim("???", 0, height, Colours.RED)
+            }
+
+            return width to (Scoreboard.stats.puzzleCount + 1) * mc.font.lineHeight
         } else {
-            Scan.puzzles.forEachIndexed { index, puzzle ->
-                val height = (index + 1) * (mc.font.lineHeight + 2)
-
-                val color = if (puzzle.state == Room.State.GREEN || puzzle.state == Room.State.CLEARED) Color.GREEN else Color.RED
-                val name = if (puzzle.data == null) "???" else puzzle.data!!.name
-                context.text(mc.font, name, 0, height, color.rgb)
-            }
-
-            undiscoveredPuzzleCount = Scoreboard.stats.puzzleCount - Scan.puzzles.size
-        }
-
-        for (index in Scoreboard.stats.puzzleCount - undiscoveredPuzzleCount until Scoreboard.stats.puzzleCount) {
-            val height = (index + 1) * (mc.font.lineHeight + 2)
-            context.text(mc.font, "???", 0, height, Color.RED.rgb)
+            return zero
         }
     }
-
-    override fun example(context: GuiGraphicsExtractor) {
-        context.text(mc.font, "Puzzles(3):", 0, 0, Color.WHITE.rgb)
-        context.text(mc.font, "Tic Tac Toe", 0, mc.font.lineHeight + 2, Color.GREEN.rgb)
-        context.text(mc.font, "Quiz", 0, (mc.font.lineHeight + 2) * 2, Color.RED.rgb)
-        context.text(mc.font, "???", 0, (mc.font.lineHeight + 2) * 3, Color.RED.rgb)
-    }
-
-    override fun bounds(): Pair<Double, Double> =
-        Pair(mc.font.width("Tic Tac Toe").toDouble(), mc.font.lineHeight.toDouble() * 4 + 2 * 3)
 }

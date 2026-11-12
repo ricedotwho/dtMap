@@ -1,10 +1,12 @@
 package com.ricedotwho.dtmap.features.map
 
-import com.ricedotwho.dtmap.DtMap.mc
-import com.ricedotwho.dtmap.DtMap.scope
-import com.ricedotwho.dtmap.config.C1Map
+import com.mojang.datafixers.util.Pair
+import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.OdinMod.scope
+import com.odtheking.odin.utils.Color
+import com.ricedotwho.dtmap.config.dungeon.AutoDE
+import com.ricedotwho.dtmap.config.dungeon.MapConfig
 import com.ricedotwho.dtmap.events.ChatEvents
-import com.ricedotwho.dtmap.events.LocationEvents
 import com.ricedotwho.dtmap.features.SoloClear
 import com.ricedotwho.dtmap.features.map.DungeonMap.mapCenter
 import com.ricedotwho.dtmap.features.map.DungeonMap.roomSize
@@ -19,10 +21,8 @@ import net.minecraft.ChatFormatting
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket
-import net.minecraft.util.Tuple
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.entity.player.PlayerSkin
-import java.awt.Color
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -89,17 +89,17 @@ object Scoreboard {
         var isDead: Boolean = false,
         var deaths: Int = 0
     ) {
-        fun mapRenderPosition(): Tuple<Float, Float> =
+        fun mapRenderPosition(): Pair<Float, Float> =
             if (entity != null) {
                 val x = (entity!!.x + 201.0) / (32.0 / 20.0)
                 val z = (entity!!.z + 201.0) / (32.0 / 20.0)
-                Tuple(x.toFloat(), z.toFloat())
+                Pair(x.toFloat(), z.toFloat())
             } else if (roomSize != null) {
                 val offset = this.mapPos.multiply(32.0 / (((roomSize!! + 4.0) * 2)))
                 val pos = mapCenter!!.add(offset).add(Vec2i(201, 201)).divide(32.0 / 20.0)
-                Tuple(pos.x.toFloat(), pos.z.toFloat())
+                Pair(pos.x.toFloat(), pos.z.toFloat())
             } else {
-                Tuple(0f, 0f)
+                Pair(0f, 0f)
             }
 
         fun mapRenderYaw(): Float =
@@ -107,12 +107,12 @@ object Scoreboard {
     }
 
     enum class DungeonClass(val color: Color) {
-        Archer(C1Map.archerColor),
-        Berserk(C1Map.berserkColor),
-        Healer(C1Map.healerColor),
-        Mage(C1Map.mageColor),
-        Tank(C1Map.tankColor),
-        Unknown(C1Map.playerHeadBackground);
+        Archer(MapConfig.archerColour),
+        Berserk(MapConfig.berserkColor),
+        Healer(MapConfig.healerColor),
+        Mage(MapConfig.mageColor),
+        Tank(MapConfig.tankColor),
+        Unknown(MapConfig.playerHeadBackground);
     }
 
     data class TabData(
@@ -134,12 +134,12 @@ object Scoreboard {
             (Scan.blood != null && Scan.blood!!.state == Room.State.GREEN)
 
         fun calculateTotalSecrets(): Int =
-            if (Scan.loadedAllRooms && SoloClear.hack(!C1Map.legitMode)) Scan.allSecrets
+            if (Scan.loadedAllRooms && SoloClear.hack(!MapConfig.legitMode)) Scan.allSecrets
             else if (secretsFound == 0 || secretsPercent == 0f) 0
             else floor(100 / secretsPercent * secretsFound + 0.5).toInt()
 
         fun calculateMaxBonusScore(): Int {
-            val princeMaxScore = if (SoloClear.legit(C1Map.legitMode)) Prince.legitPrince else Prince.cheaterPrince
+            val princeMaxScore = if (SoloClear.legit(MapConfig.legitMode)) Prince.legitPrince else Prince.cheaterPrince
             return 5 + (if (princeMaxScore) 1 else 0) + if (floor.number >= 6) 2 else 0
         }
 
@@ -175,11 +175,11 @@ object Scoreboard {
              calculateBonusScoreNoPaul() + calculatePaulScore()
 
         fun calculatePaulScore(): Int =
-            if (((C1Map.scorePaul == 0 && paul) || C1Map.scorePaul == 1) && !SoloClear.isSoloClearing()) 10 else 0
+            if (((MapConfig.scorePaul == AutoDE.AUTO && paul) || MapConfig.scorePaul == AutoDE.ENABLED) && !SoloClear.isSoloClearing()) 10 else 0
 
         fun calculateMinimumSecrets(forceNoMaxBonus: Boolean = false, forceNeeded: Boolean = false): Int {
-            val bonus = (if (!forceNoMaxBonus && C1Map.scoreMaxBonusForMissingSecrets) calculateMaxBonusScore() else calculateBonusScoreNoPaul()) + if (C1Map.scoreMissingSecretsCalculatePaul) calculatePaulScore() else 0
-            val found = if (!forceNeeded && C1Map.scoreNeededSecretsInsteadOfMissing) 0 else secretsFound
+            val bonus = (if (!forceNoMaxBonus && MapConfig.scoreMaxBonusForMissingSecrets) calculateMaxBonusScore() else calculateBonusScoreNoPaul()) + if (MapConfig.scoreMissingSecretsCalculatePaul) calculatePaulScore() else 0
+            val found = if (!forceNeeded && MapConfig.scoreNeededSecretsInsteadOfMissing) 0 else secretsFound
             return (ceil(
                 calculateTotalSecrets() * floor.secretFactor * (40 - bonus + (deaths * 2 - 1).coerceAtLeast(0)) / 40f
             ).toInt() - found).coerceAtLeast(0)
@@ -334,7 +334,6 @@ object Scoreboard {
         floorRegex.find(text)?.groupValues?.get(1)?.let { floor = Floor.fromString(it) }
         if (oldFloor == Floor.Unknown && floor != Floor.Unknown) {
             scope.launch(Dispatchers.IO) { paul = Web.hasBonusPaulScore() }
-            LocationEvents.ON_ENTER_DUNGEON.invoker().enterDungeon(floor)
         }
 
         clearedRegex.find(text)?.groupValues?.get(1)?.toIntOrNull()?.let {

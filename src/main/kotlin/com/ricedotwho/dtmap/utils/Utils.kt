@@ -1,29 +1,22 @@
 package com.ricedotwho.dtmap.utils
 
-import com.ricedotwho.dtmap.DtMap.mc
+import com.mojang.blaze3d.vertex.PoseStack
+import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.events.RenderExtractEvent
+import com.odtheking.odin.utils.Color
+import com.odtheking.odin.utils.render.CustomRenderType
+import com.odtheking.odin.utils.render.PrimitiveRenderer
+import net.fabricmc.fabric.api.client.rendering.v1.SubmitRenderPhases
+import net.minecraft.client.renderer.SubmitNodeCollector
+import net.minecraft.client.renderer.rendertype.RenderType
 import net.minecraft.core.BlockPos
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.ContainerInput
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
-import java.awt.Color
-import kotlin.math.max
-
-fun Color.opacity(multiplier: Float): Color =
-    Color(this.red, this.green, this.blue, (this.alpha * multiplier).toInt())
-
-fun Color.darker(multiplier: Float): Color =
-    Color(
-        max((this.red * multiplier).toInt(), 0),
-        max((this.green * multiplier).toInt(), 0),
-        max((this.blue * multiplier).toInt(), 0),
-        this.alpha
-    )
-
-inline val Entity.renderPos: Vec3
-    get() =
-        Vec3(this.renderX, this.renderY, this.renderZ)
+import net.minecraft.world.phys.shapes.Shapes
+import net.minecraft.world.phys.shapes.VoxelShape
 
 inline val Entity.renderX: Double
     get() =
@@ -62,3 +55,46 @@ fun romanToInt(s: String): Int {
 
 fun BlockPos.toAABB(): AABB =
     AABB(this)
+
+fun BlockPos.box(): AABB {
+    val shape = mc.level!!.getBlockState(this).getShape(mc.level!!, this)
+    return (if (shape.isEmpty) Shapes.block().bounds() else shape.bounds()).move(this)
+}
+
+private fun resolveQuadRenderType(depth: Boolean, fullyOpaque: Boolean) = when {
+    depth && fullyOpaque -> CustomRenderType.QUADS_OPAQUE
+    depth -> CustomRenderType.QUADS_TRANSLUCENT
+    fullyOpaque -> CustomRenderType.QUADS_ESP
+    else -> CustomRenderType.QUADS_TRANSLUCENT_ESP
+}
+
+private fun RenderExtractEvent.cameraRelativePose(offset: Vec3 = Vec3.ZERO): PoseStack {
+    val camera = mc.gameRenderer.mainCamera().position()
+    val poseStack = context.poseStack()
+    poseStack.pushPose()
+    poseStack.translate(offset.x - camera.x, offset.y - camera.y, offset.z - camera.z)
+    return poseStack
+}
+
+fun RenderExtractEvent.filledShape(shape: VoxelShape, color: Color, depth: Boolean = false) {
+    val renderType = resolveQuadRenderType(depth, color.alphaFloat >= 0.999f)
+
+    val poseStack = cameraRelativePose()
+    submitGeometry(poseStack, renderType, depth) { pose, buffer ->
+        shape.forAllBoxes { minX, minY, minZ, maxX, maxY, maxZ ->
+            PrimitiveRenderer.addChainedFilledBoxVertices(
+                pose, buffer,
+                minX.toFloat(), minY.toFloat(), minZ.toFloat(),
+                maxX.toFloat(), maxY.toFloat(), maxZ.toFloat(),
+                color.redFloat, color.greenFloat, color.blueFloat, color.alphaFloat
+            )
+        }
+    }
+    poseStack.popPose()
+}
+
+private fun RenderExtractEvent.submitGeometry(poseStack: PoseStack, renderType: RenderType, depth: Boolean, renderer: SubmitNodeCollector.CustomGeometryRenderer) {
+    val collector = context.submitNodeCollector()
+    if (depth) return collector.submitCustomGeometry(poseStack, renderType, renderer)
+    collector.submitCustom(SubmitRenderPhases.SEE_THROUGH_NAME_TAGS, NoDepthSubmit(poseStack.last().copy(), renderType, renderer))
+}

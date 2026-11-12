@@ -1,18 +1,19 @@
 package com.ricedotwho.dtmap.features.map
 
-import com.ricedotwho.dtmap.DtMap.mc
-import com.ricedotwho.dtmap.config.C1Map
-import com.ricedotwho.dtmap.config.C3Other
+import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.utils.Color
+import com.odtheking.odin.utils.Color.Companion.darker
+import com.ricedotwho.dtmap.config.dungeon.MapConfig
+import com.ricedotwho.dtmap.config.dungeon.SoloClearConfig
 import com.ricedotwho.dtmap.features.SoloClear
 import com.ricedotwho.dtmap.features.map.Scan.roomsList
-import com.ricedotwho.dtmap.utils.darker
+import com.ricedotwho.dtmap.utils.Colours
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Vec3i
 import net.minecraft.resources.Identifier
 import net.minecraft.world.phys.Vec3
-import java.awt.Color
 
 class Room(var type: Type, var shape: Shape, var data: RoomData? = null, var height: Int? = null, var floorHeight: Int? = null) {
     var tiles: MutableList<Tile> = mutableListOf()
@@ -21,6 +22,7 @@ class Room(var type: Type, var shape: Shape, var data: RoomData? = null, var hei
     var clayPos: BlockPos? = null
     var rotation: Rotation = Rotation.NONE
     val doors = mutableSetOf<Door>()
+    var secretsDone = 0
 
     // TODO: this doesn't allow for a room to have more than 1 entry tile, which will happen when 2 rooms lead to the same room at different places
 
@@ -93,7 +95,7 @@ class Room(var type: Type, var shape: Shape, var data: RoomData? = null, var hei
         val oldState = state
         state = when (color) {
             0 -> {
-                if (C3Other.soloClearingInstantRoomUpdate && SoloClear.isSoloClearing() && (state == State.UNOPENED || state == State.UNDISCOVERED)) {
+                if (SoloClearConfig.soloClearingInstantRoomUpdate && SoloClear.isSoloClearing() && (state == State.UNOPENED || state == State.UNDISCOVERED)) {
                     return null
                 }
 
@@ -119,7 +121,7 @@ class Room(var type: Type, var shape: Shape, var data: RoomData? = null, var hei
                 entryTile = placement
                 specialTile = placement.x == SpecialColumn.column
 
-                if (C3Other.soloClearingInstantRoomUpdate && SoloClear.isSoloClearing() && state != State.UNDISCOVERED) return null
+                if (SoloClearConfig.soloClearingInstantRoomUpdate && SoloClear.isSoloClearing() && state != State.UNDISCOVERED) return null
 
                 State.UNOPENED
             }
@@ -131,35 +133,35 @@ class Room(var type: Type, var shape: Shape, var data: RoomData? = null, var hei
     }
 
     private fun color(): Array<Color> {
-        val legit = SoloClear.legit(C1Map.legitMode)
+        val legit = SoloClear.legit(MapConfig.legitMode)
         if (legit && state == State.UNOPENED) {
             return if (isKnown1x1 && doors.count { it.seen } == 1) SpecialColumn.roomColorGuess(this)
-            else if (type == Type.BLOOD) arrayOf(C1Map.bloodRoomColor.darker(C1Map.darkenMultiplier))
-            else arrayOf(C1Map.unopenedRoomColor)
+            else if (type == Type.BLOOD) arrayOf(MapConfig.bloodRoomColor.darker(MapConfig.darkenMultiplier))
+            else arrayOf(MapConfig.unopenedRoomColor)
         }
 
-        val color = if (mimic && !legit) C1Map.mimicRoomColor else when (type) {
-            Type.BLOOD -> C1Map.bloodRoomColor
-            Type.NORMAL -> C1Map.normalRoomColor
-            Type.PUZZLE -> C1Map.puzzleRoomColor
-            Type.CHAMPION -> C1Map.championRoomColor
-            Type.TRAP -> C1Map.trapRoomColor
-            Type.ENTRANCE -> C1Map.entranceRoomColor
-            Type.FAIRY -> C1Map.fairyRoomColor
-            Type.RARE -> C1Map.rareRoomColor
+        val color = if (mimic && !legit) MapConfig.mimicRoomColor else when (type) {
+            Type.BLOOD -> MapConfig.bloodRoomColor
+            Type.NORMAL -> MapConfig.normalRoomColor
+            Type.PUZZLE -> MapConfig.puzzleRoomColor
+            Type.CHAMPION -> MapConfig.championRoomColor
+            Type.TRAP -> MapConfig.trapRoomColor
+            Type.ENTRANCE -> MapConfig.entranceRoomColor
+            Type.FAIRY -> MapConfig.fairyRoomColor
+            Type.RARE -> MapConfig.rareRoomColor
             // not sure if this is a good color for this
-            Type.UNKNOWN -> return arrayOf(C1Map.unopenedRoomColor)
+            Type.UNKNOWN -> return arrayOf(MapConfig.unopenedRoomColor)
         }
 
         if (state == State.UNDISCOVERED || state == State.UNOPENED) {
-            return arrayOf(color.darker(C1Map.darkenMultiplier))
+            return arrayOf(color.darker(MapConfig.darkenMultiplier))
         }
 
         return arrayOf(color)
     }
 
     fun render(context: GuiGraphicsExtractor) {
-        val legitMode = SoloClear.legit(C1Map.legitMode)
+        val legitMode = SoloClear.legit(MapConfig.legitMode)
         if (legitMode && state == State.UNDISCOVERED) return
 
         val matrices = context.pose()
@@ -172,17 +174,17 @@ class Room(var type: Type, var shape: Shape, var data: RoomData? = null, var hei
 
             val color = color()
             when (color.size) {
-                1 -> context.fill(0, 0, 16, 16, color[0].rgb)
+                1 -> context.fill(0, 0, 16, 16, color[0].rgba)
                 2 -> {
-                    context.fill(0, 0, 16, 8, color[0].rgb)
-                    context.fill(0, 8, 16, 16, color[1].rgb)
+                    context.fill(0, 0, 16, 8, color[0].rgba)
+                    context.fill(0, 8, 16, 16, color[1].rgba)
                 }
                 3 -> {
-                    context.fill(0, 0, 16, 5, color[0].rgb)
-                    context.fill(0, 0, 5, 10, color[0].rgb)
-                    context.fill(10, 5, 16, 16, color[1].rgb)
-                    context.fill(0, 10, 16, 16, color[1].rgb)
-                    context.fill(5, 5, 11, 11, color[2].rgb)
+                    context.fill(0, 0, 16, 5, color[0].rgba)
+                    context.fill(0, 0, 5, 10, color[0].rgba)
+                    context.fill(10, 5, 16, 16, color[1].rgba)
+                    context.fill(0, 10, 16, 16, color[1].rgba)
+                    context.fill(5, 5, 11, 11, color[2].rgba)
                 }
             }
 
@@ -204,28 +206,28 @@ class Room(var type: Type, var shape: Shape, var data: RoomData? = null, var hei
         if (shape == Shape.SL && tiles.size > 2) {
             when (rotation) {
                 Rotation.SOUTH -> {
-                    context.fill(topLeft.x, topLeft.z, topLeft.x + 16, bottomRight.z + 16, color[0].rgb)
-                    context.fill(topLeft.x, bottomRight.z, bottomRight.x + 16, bottomRight.z + 16, color[0].rgb)
+                    context.fill(topLeft.x, topLeft.z, topLeft.x + 16, bottomRight.z + 16, color[0].rgba)
+                    context.fill(topLeft.x, bottomRight.z, bottomRight.x + 16, bottomRight.z + 16, color[0].rgba)
                 }
                 Rotation.WEST -> {
-                    context.fill(topLeft.x, topLeft.z, topLeft.x + 36, topLeft.z + 16, color[0].rgb)
-                    context.fill(topLeft.x, topLeft.z, topLeft.x + 16, topLeft.z + 36, color[0].rgb)
+                    context.fill(topLeft.x, topLeft.z, topLeft.x + 36, topLeft.z + 16, color[0].rgba)
+                    context.fill(topLeft.x, topLeft.z, topLeft.x + 16, topLeft.z + 36, color[0].rgba)
                 }
                 Rotation.NORTH -> {
-                    context.fill(topLeft.x, topLeft.z, bottomRight.x + 16, topLeft.z + 16, color[0].rgb)
-                    context.fill(bottomRight.x, topLeft.z, bottomRight.x + 16, bottomRight.z + 16, color[0].rgb)
+                    context.fill(topLeft.x, topLeft.z, bottomRight.x + 16, topLeft.z + 16, color[0].rgba)
+                    context.fill(bottomRight.x, topLeft.z, bottomRight.x + 16, bottomRight.z + 16, color[0].rgba)
                 }
                 Rotation.EAST -> {
-                    context.fill(topLeft.x, topLeft.z, topLeft.x + 16, topLeft.z + 36, color[0].rgb)
-                    context.fill(topLeft.x - 20, bottomRight.z, topLeft.x + 16, bottomRight.z + 16, color[0].rgb)
+                    context.fill(topLeft.x, topLeft.z, topLeft.x + 16, topLeft.z + 36, color[0].rgba)
+                    context.fill(topLeft.x - 20, bottomRight.z, topLeft.x + 16, bottomRight.z + 16, color[0].rgba)
                 }
                 else -> {}
             }
         } else {
-            context.fill(topLeft.x, topLeft.z, bottomRight.x + 16, bottomRight.z + 16, color[0].rgb)
+            context.fill(topLeft.x, topLeft.z, bottomRight.x + 16, bottomRight.z + 16, color[0].rgba)
         }
 
-        if (C1Map.roomAdditionsPrince && data?.prince == true && !Scoreboard.stats.princeKilled) {
+        if (MapConfig.roomAdditionsPrince && data?.prince == true && !Scoreboard.stats.princeKilled) {
             matrices.pushMatrix()
             matrices.translate(bottomRight.x.toFloat() + 9f, bottomRight.z.toFloat() + 10f)
             matrices.scale(0.7f)
@@ -238,28 +240,35 @@ class Room(var type: Type, var shape: Shape, var data: RoomData? = null, var hei
         val matrices = context.pose()
         val fontHeight = mc.font.lineHeight
 
-        if ((!C3Other.soloClearingOnlyShowCheckmarks || !SoloClear.isSoloClearing()) && (!SoloClear.legit(C1Map.legitMode) || (state != State.UNDISCOVERED && state != State.UNOPENED)) && type != Type.FAIRY) {
+        if ((!SoloClearConfig.soloClearingOnlyShowCheckMark || !SoloClear.isSoloClearing()) && (!SoloClear.legit(
+                MapConfig.legitMode) || (state != State.UNDISCOVERED && state != State.UNOPENED)) && type != Type.FAIRY) {
             data?.name?.let { name ->
-                val splitName = name.split(" ")
+                val splitName = name.split(" ").toMutableList()
+
+                if (data!!.secrets != 0 && secretsDone != 0 && (secretsDone != data!!.secrets || state == State.DISCOVERED) && state != State.GREEN) {
+                    splitName.add(secretsDone.toString())
+                }
+
                 val defaultHeight =
                     8 - fontHeight / (2 * textFactor) - ((splitName.size - 1) / 2.0 * (fontHeight / textFactor)).toInt()
 
                 val placement = textPlacement()
+
+                val color = when (state) {
+                    State.GREEN -> Colours.GREEN.rgba
+                    State.CLEARED -> Color(255, 255, 255).rgba
+                    State.DISCOVERED -> Color(100, 100, 100).rgba
+                    State.FAILED -> Color(255, 0, 0).rgba
+                    else -> Color(255, 255, 255).rgba
+                }
+
                 splitName.withIndex().forEach { (index, value) ->
                     matrices.pushMatrix()
                     matrices.translate(
                         placement.x + 8f,
                         placement.z + index * (fontHeight / textFactor) + defaultHeight
                     )
-                    matrices.scale(C1Map.textScaling)
-
-                    val color = when (state) {
-                        State.GREEN -> Color.GREEN.rgb
-                        State.CLEARED -> Color(255, 255, 255).rgb
-                        State.DISCOVERED -> Color(100, 100, 100).rgb
-                        State.FAILED -> Color(255, 0, 0).rgb
-                        else -> Color(255, 255, 255).rgb
-                    }
+                    matrices.scale(MapConfig.textScaling)
 
                     context.centeredText(
                         mc.font,
@@ -281,7 +290,7 @@ class Room(var type: Type, var shape: Shape, var data: RoomData? = null, var hei
             State.CLEARED -> MapRenderer.whiteCheck
             State.FAILED -> MapRenderer.cross
             State.UNOPENED -> {
-                if (!C1Map.undiscoveredQuestionMarks || (isKnown1x1 && doors.size == 1) || type == Type.BLOOD) {
+                if (!MapConfig.undiscoveredQuestionMarks || (isKnown1x1 && doors.size == 1) || type == Type.BLOOD) {
                     return
                 }
                 MapRenderer.questionMark
@@ -346,7 +355,7 @@ class Room(var type: Type, var shape: Shape, var data: RoomData? = null, var hei
         tiles.minBy { it.pos.x * 1000 + it.pos.z }.placement
 
     fun textPlacement(): Vec2i {
-        if (rotation == Rotation.NONE || !C1Map.textCenter) return topLeftTilePlacement()
+        if (rotation == Rotation.NONE || !MapConfig.textCenter) return topLeftTilePlacement()
         val placements = tiles.map { it.placement }
 
         return if (shape == Shape.SL && tiles.size > 2) {

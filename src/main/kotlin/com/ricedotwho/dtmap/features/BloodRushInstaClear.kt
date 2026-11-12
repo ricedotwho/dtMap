@@ -1,7 +1,8 @@
 package com.ricedotwho.dtmap.features
 
+import com.odtheking.odin.OdinMod.mc
 import com.ricedotwho.dtmap.DtMap
-import com.ricedotwho.dtmap.config.C1Map
+import com.ricedotwho.dtmap.config.dungeon.MapConfig
 import com.ricedotwho.dtmap.events.MapEvents
 import com.ricedotwho.dtmap.features.map.Room
 import com.ricedotwho.dtmap.utils.Chat
@@ -19,7 +20,7 @@ object BloodRushInstaClear {
     private val SIREN_SOUND = SoundEvent.createVariableRangeEvent(SOUND_ID)
 
     private val RoomUpdated = MapEvents.UpdatedRooms { rooms ->
-        if (!C1Map.bloodRushInstaclearNotification) return@UpdatedRooms
+        if (!MapConfig.bloodRushInstaclearNotification) return@UpdatedRooms
 
         rooms.forEach { (room, old, new) ->
             if (!room.rushRoom || room.type == Room.Type.FAIRY || !DungeonMessages.seenDungeonStart) return@forEach
@@ -27,7 +28,7 @@ object BloodRushInstaClear {
             if ((old == Room.State.UNOPENED || old == Room.State.UNDISCOVERED) && (new == Room.State.CLEARED || new == Room.State.GREEN)) {
                 Chat.send("A room was instacleared: ${room.data?.name}")
                 Scheduler.scheduleTickEnd {
-                    DtMap.mc.player?.playSound(SIREN_SOUND, 1f, 1f)
+                    mc.player?.playSound(SIREN_SOUND, 1f, 1f)
                 }
             }
         }

@@ -1,6 +1,6 @@
 package com.ricedotwho.dtmap.utils
 
-import com.ricedotwho.dtmap.DtMap.mc
+import com.odtheking.odin.OdinMod.mc
 import com.ricedotwho.dtmap.events.ChatEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents
 import java.util.regex.Pattern

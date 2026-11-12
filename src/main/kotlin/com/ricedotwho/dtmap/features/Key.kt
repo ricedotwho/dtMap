@@ -1,16 +1,19 @@
 package com.ricedotwho.dtmap.features
 
+import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.events.RenderExtractEvent
+import com.odtheking.odin.events.core.EventBus
+import com.odtheking.odin.events.core.on
+import com.odtheking.odin.utils.render.drawFilledBox
+import com.odtheking.odin.utils.render.drawTracer
+import com.odtheking.odin.utils.skyblock.Island
+import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.ricedotwho.dtmap.DtMap
-import com.ricedotwho.dtmap.config.C2Esp
-import com.ricedotwho.dtmap.config.C3Other
+import com.ricedotwho.dtmap.config.dungeon.EspConfig
 import com.ricedotwho.dtmap.events.ChatEvents
 import com.ricedotwho.dtmap.utils.DungeonMessages
-import com.ricedotwho.dtmap.utils.Location
-import com.ricedotwho.dtmap.utils.drawFilled
-import com.ricedotwho.dtmap.utils.drawLineFromCursor
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents
 import net.minecraft.core.component.DataComponents
 import net.minecraft.resources.Identifier
 import net.minecraft.sounds.SoundEvent
@@ -29,40 +32,43 @@ object Key {
     private val SOUND_ID = Identifier.fromNamespaceAndPath("dtmap", "key")
     private val KEY_SOUND = SoundEvent.createVariableRangeEvent(SOUND_ID)
 
-    fun register() {
-        ChatEvents.SYSTEM_MESSAGE_CLIENT_EVENT.register { (_, _, unformatted) ->
-            if (!C3Other.keyPickupPling || Location.island != Location.Island.Dungeon || DungeonMessages.inBoss || SoloClear.isSoloClearing()) return@register
+    init {
+        EventBus.subscribe(this)
 
-            val witherKeyPickup = DungeonMessages.witherKeyClaimPattern.matcher(unformatted).matches() || unformatted == DungeonMessages.witherKeyPickedUpString
-            val bloodKeyPickup = DungeonMessages.bloodKeyClaimPattern.matcher(unformatted).matches() || unformatted == DungeonMessages.bloodKeyPickedUpString
-
-            if (witherKeyPickup || bloodKeyPickup) DtMap.mc.player?.playSound(KEY_SOUND, C3Other.keyPickupPlingVolume, 1.0f)
-        }
-
-        LevelRenderEvents.AFTER_TRANSLUCENT_TERRAIN.register { ctx ->
-            if (SoloClear.isSoloClearing()) return@register
+        on<RenderExtractEvent> {
+            if (SoloClear.isSoloClearing()) return@on
 
             currentKey?.let {
-                if (C2Esp.keyTracer) {
-                    ctx.drawLineFromCursor(
-                        Vec3(it.x, it.y + 1.5, it.z),
-                        C2Esp.keyTracerColor,
-                        C2Esp.keyTracerWidth
+                if (EspConfig.keyTracer) {
+                    drawTracer(Vec3(it.x, it.y + 1.5, it.z),
+                        EspConfig.keyTracerColour,
+                        false,
+                        EspConfig.keyWidth
                     )
                 }
 
-                if (C2Esp.keyEsp) {
-                    ctx.drawFilled(
+                if (EspConfig.keyEsp) {
+                    drawFilledBox(
                         AABB.unitCubeFromLowerCorner(it.position().add(-0.5, 1.25, -0.5)),
-                        C2Esp.keyColor,
-                        true
+                        EspConfig.keyColour
                     )
                 }
             }
         }
+    }
+
+    fun register() {
+        ChatEvents.SYSTEM_MESSAGE_CLIENT_EVENT.register { (_, _, unformatted) ->
+            if (!EspConfig.keyPickupPling || LocationUtils.currentArea != Island.Dungeon || DungeonMessages.inBoss || SoloClear.isSoloClearing()) return@register
+
+            val witherKeyPickup = DungeonMessages.witherKeyClaimPattern.matcher(unformatted).matches() || unformatted == DungeonMessages.witherKeyPickedUpString
+            val bloodKeyPickup = DungeonMessages.bloodKeyClaimPattern.matcher(unformatted).matches() || unformatted == DungeonMessages.bloodKeyPickedUpString
+
+            if (witherKeyPickup || bloodKeyPickup) mc.player?.playSound(KEY_SOUND, EspConfig.keyPickupVolume, 1.0f)
+        }
 
         ClientTickEvents.END_CLIENT_TICK.register { client ->
-            if (Location.island != Location.Island.Dungeon || DungeonMessages.inBoss) return@register
+            if (LocationUtils.currentArea != Island.Dungeon || DungeonMessages.inBoss) return@register
             if (client.level == null) return@register
             if (currentKey?.isAlive == false) currentKey = null
             if (currentKey != null) return@register

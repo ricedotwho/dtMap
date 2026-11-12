@@ -4,7 +4,8 @@
   "package": "com.ricedotwho.dtmap.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "ConnectionMixin"
+    "ConnectionMixin",
+    "OdinDungeonMapSyncSocketMixin"
   ],
   "injectors": {
     "defaultRequire": 1
@@ -15,7 +16,6 @@
   "client": [
     "ClientPacketListenerPriorityMixin",
     "ClientPlayNetworkHandlerMixin",
-    "GameRendererMixin",
-    "MinecraftMixin"
+    "OdinClickGUIMixin"
   ]
 }

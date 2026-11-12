@@ -1,6 +1,7 @@
 package com.ricedotwho.dtmap.features
 
-import com.ricedotwho.dtmap.utils.Location
+import com.odtheking.odin.utils.skyblock.Island
+import com.odtheking.odin.utils.skyblock.LocationUtils
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.core.component.DataComponents
 import net.minecraft.world.item.component.CustomData
@@ -15,7 +16,7 @@ object Leap {
     }
 
     private val Tick = ClientTickEvents.EndTick { client ->
-        if (Location.island != Location.Island.Dungeon) return@EndTick
+        if (LocationUtils.currentArea != Island.Dungeon) return@EndTick
 
         val player = client.player ?: return@EndTick
 

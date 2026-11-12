@@ -3,7 +3,7 @@ package com.ricedotwho.dtmap.features.map
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.ricedotwho.dtmap.DtMap.mc
+import com.odtheking.odin.OdinMod.mc
 import com.ricedotwho.dtmap.utils.BlockPosAdapter
 import com.ricedotwho.dtmap.utils.RoomShapeAdapter
 import net.minecraft.core.BlockPos

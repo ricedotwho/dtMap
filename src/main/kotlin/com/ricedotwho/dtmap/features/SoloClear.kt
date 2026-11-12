@@ -1,9 +1,15 @@
 package com.ricedotwho.dtmap.features
 
+import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.events.RenderExtractEvent
+import com.odtheking.odin.utils.render.drawFilledBox
+import com.odtheking.odin.utils.render.drawWireFrameBox
+import com.odtheking.odin.utils.skyblock.Island
+import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.ricedotwho.dtmap.DtMap
-import com.ricedotwho.dtmap.DtMap.mc
-import com.ricedotwho.dtmap.config.C2Esp
-import com.ricedotwho.dtmap.config.C3Other
+import com.ricedotwho.dtmap.config.dungeon.EspConfig
+import com.ricedotwho.dtmap.config.dungeon.SoloClearConfig
+import com.ricedotwho.dtmap.config.dungeon.SoloClearing
 import com.ricedotwho.dtmap.events.MapEvents
 import com.ricedotwho.dtmap.features.map.Door
 import com.ricedotwho.dtmap.features.map.DoorEsp
@@ -12,14 +18,10 @@ import com.ricedotwho.dtmap.features.map.Room
 import com.ricedotwho.dtmap.features.map.Scan
 import com.ricedotwho.dtmap.features.map.Scoreboard
 import com.ricedotwho.dtmap.features.map.SpecialColumn
-import com.ricedotwho.dtmap.utils.Location
 import com.ricedotwho.dtmap.utils.clickSlot
-import com.ricedotwho.dtmap.utils.drawFilled
-import com.ricedotwho.dtmap.utils.drawLineBox
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket
@@ -31,8 +33,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 object SoloClear {
     fun isSoloClearing(): Boolean {
         if (fuckCurrentMap) return false
-        if (C3Other.soloClearHudInsight && DtMap.keybindShowHud.isDown) return false
-        if ((C3Other.soloClearing == 1 && Scoreboard.dungeonTeammatesNoSelf.isEmpty()) || C3Other.soloClearing == 2) return true
+        if (SoloClearConfig.soloClearHudInsight && DtMap.keybindShowHud.isDown) return false
+        if ((SoloClearConfig.soloClearing == SoloClearing.AUTO && Scoreboard.dungeonTeammatesNoSelf.isEmpty()) || SoloClearConfig.soloClearing == SoloClearing.YES) return true
         return false
     }
 
@@ -57,11 +59,11 @@ object SoloClear {
     var lastClosed = 0L
     var fuckCurrentMap = false
     val HudCallback = HudElement { _, _ ->
-        if (!C3Other.soloClearingInstaJoin || !isSoloClearing() || Location.island != Location.Island.Dungeon) return@HudElement
+        if (!SoloClearConfig.soloClearingInstaJoin || !isSoloClearing() || LocationUtils.currentArea != Island.Dungeon) return@HudElement
 
         val player = mc.player ?: return@HudElement
 
-        val screen = mc.screen as? AbstractContainerScreen<*> ?: return@HudElement
+        val screen = mc.gui.screen() as? AbstractContainerScreen<*> ?: return@HudElement
         if (screen.menu.containerId == lastClickedIn) return@HudElement
 
         if (screen.title.string != "Undersized party!") {
@@ -89,14 +91,14 @@ object SoloClear {
         val title = packet.title.string
         if (title != "Creating instance....") return false
 
-        Minecraft.getInstance().screen = null
+        Minecraft.getInstance().gui.setScreen(null)
         mc.connection!!.send(ServerboundContainerClosePacket(packet.containerId))
         ci.cancel()
         return true
     }
 
     val EnterRoom = MapEvents.EnterRoom { room ->
-        if (!C3Other.soloClearingInstantRoomUpdate || !isSoloClearing()) return@EnterRoom
+        if (!SoloClearConfig.soloClearingInstantRoomUpdate || !isSoloClearing()) return@EnterRoom
 
         room?.owner?.let {
             if (it.type == Room.Type.ENTRANCE) return@EnterRoom
@@ -131,7 +133,7 @@ object SoloClear {
         }
     }
 
-    fun renderDoorEsp(context: LevelRenderContext) {
+    fun renderDoorEsp(context: RenderExtractEvent) {
         val roomPlayerIn = DungeonMap.roomPlayerInNoBoundsCheck()
 
         Scan.doors.forEach { door ->
@@ -139,22 +141,18 @@ object SoloClear {
                 return@forEach
             }
 
-            if (C2Esp.doorEsp != 1 && !door.seen) {
-                return@forEach
-            }
-
             if (door.rooms.none { it.owner == roomPlayerIn?.owner }) return@forEach
 
-            val colors = if (door.locked && door.type == Door.Type.WITHER && DoorEsp.witherKeys > 0) arrayOf(C2Esp.doorOpenableColor, C2Esp.doorOpenableColorFilled)
-            else arrayOf(C2Esp.doorEspColor, C2Esp.doorEspColorFilled)
+            val colors = if (door.locked && door.type == Door.Type.WITHER && DoorEsp.witherKeys > 0) arrayOf(EspConfig.doorOpenableColor, EspConfig.doorOpenableColorFilled)
+            else arrayOf(EspConfig.doorEspColor, EspConfig.doorEspColorFilled)
 
             val box = AABB(
                 door.pos.x - 1.0, 69.0, door.pos.z - 1.0,
                 door.pos.x + 2.0, 73.0, door.pos.z + 2.0
             )
 
-            if (colors[0].alpha > 0) context.drawLineBox(box, colors[0], C2Esp.doorEspWidth, false)
-            if (colors[1].alpha > 0) context.drawFilled(box, colors[1], false)
+            if (colors[0].alpha > 0) context.drawWireFrameBox(box, colors[0], EspConfig.doorEspOutlineWidth, false)
+            if (colors[1].alpha > 0) context.drawFilledBox(box, colors[1], false)
         }
     }
 }

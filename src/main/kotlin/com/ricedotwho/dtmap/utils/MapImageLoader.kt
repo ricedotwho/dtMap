@@ -1,18 +1,13 @@
 package com.ricedotwho.dtmap.utils
 
 import com.mojang.blaze3d.platform.NativeImage
-import com.ricedotwho.dtmap.DtMap.mc
+import com.odtheking.odin.OdinMod.mc
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.renderer.texture.DynamicTexture
 import net.minecraft.resources.Identifier
-import java.nio.file.FileSystems
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.StandardWatchEventKinds
-import java.nio.file.WatchEvent
-import java.nio.file.WatchKey
-import java.nio.file.WatchService
-import java.util.UUID
+import java.nio.file.*
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.io.path.exists
 import kotlin.io.path.extension
@@ -59,7 +54,13 @@ object MapImageLoader {
             StandardWatchEventKinds.ENTRY_DELETE
         )
 
-        Thread(::watchLoop, "DTM-ImageLoader").start()
+        var watcher = Thread(::watchLoop, "DTM-ImageLoader")
+        watcher.start()
+
+        ClientLifecycleEvents.CLIENT_STOPPING.register {
+            watcher.interrupt()
+            watchService.close()
+        }
     }
 
     /**
