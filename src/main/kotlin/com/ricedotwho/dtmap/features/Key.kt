@@ -27,7 +27,7 @@ import kotlin.math.round
 
 object Key {
     var currentKey: Entity? = null
-    val uuids = listOf("2865274b-3097-394e-8149-ec629c72d850", "73f6d1f9-df41-3d1d-b98c-e1442d915885")
+    val names = listOf("Wither Key", "Blood Key")
 
     private val SOUND_ID = Identifier.fromNamespaceAndPath("dtmap", "key")
     private val KEY_SOUND = SoundEvent.createVariableRangeEvent(SOUND_ID)
@@ -74,11 +74,8 @@ object Key {
             if (currentKey != null) return@register
 
             currentKey = client.level!!.entitiesForRendering().find {
-                if (it !is ArmorStand || it.yRot == 0F || is64(it.yRot)) return@find false
-                val head = it.getItemBySlot(EquipmentSlot.HEAD)
-                if (!head.`is`(Items.PLAYER_HEAD)) return@find false
-                val profile = head.get(DataComponents.PROFILE) ?: return@register
-                uuids.contains(profile.partialProfile().id.toString())
+                if (it !is ArmorStand) return@find false
+                names.contains(it.name.string)
             } ?: return@register
         }
 
