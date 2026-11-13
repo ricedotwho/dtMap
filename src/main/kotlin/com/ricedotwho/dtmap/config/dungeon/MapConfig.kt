@@ -18,6 +18,7 @@ import com.odtheking.odin.utils.skyblock.Island
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.ricedotwho.dtmap.DtMap
 import com.ricedotwho.dtmap.DtMap.zero
+import com.ricedotwho.dtmap.features.BloodRush
 import com.ricedotwho.dtmap.features.Condition
 import com.ricedotwho.dtmap.features.Leap
 import com.ricedotwho.dtmap.features.PuzzleHud
@@ -74,6 +75,10 @@ object MapConfig : Module(
 
     val score by dtHUD("dtScore", default = mutableListOf(Condition.CLEAR, Condition.ALT)) {
         Score.render(this, it)
+    }
+
+    val rushHud by dtHUD("dtRush Hud", default = mutableListOf(Condition.ALT)) {
+        BloodRush.render(this, it)
     }
 
     // class colors

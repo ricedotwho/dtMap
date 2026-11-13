@@ -17,6 +17,7 @@ import com.ricedotwho.dtmap.features.map.RoomData
 import com.ricedotwho.dtmap.utils.DungeonMessages
 import com.ricedotwho.dtmap.utils.MapImageLoader
 import com.ricedotwho.dtmap.utils.Scheduler
+import com.ricedotwho.dtmap.utils.TickCounters
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper
@@ -53,6 +54,8 @@ object DtMap : ClientModInitializer {
         SoloClear.register()
         BloodRushInstaClear.register()
         DoorEsp.register()
+        TickCounters.register()
+        BloodRush.register()
 
         Mimic
         RedstoneKeySkullHighlight
