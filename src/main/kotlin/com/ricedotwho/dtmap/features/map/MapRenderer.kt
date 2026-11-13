@@ -154,7 +154,7 @@ object MapRenderer {
             if (MapConfig.scoreCalculation == ScoreCalculation.MAP_TIED) {
                 matrices.pushMatrix()
                 matrices.translate(roomsX / 2f, roomsZ + MapConfig.backgroundSize + 3)
-                Score.actualRender(context, true)
+                Score.actualRender(context)
                 matrices.popMatrix()
             }
 

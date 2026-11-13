@@ -5,6 +5,7 @@ plugins {
     kotlin("jvm") version "2.4.20"
     id("net.fabricmc.fabric-loom") version "1.17-SNAPSHOT"
     id("maven-publish")
+    kotlin("plugin.compose")
 }
 
 version = project.property("mod_version") as String + "+" + project.property("minecraft_version") as String
@@ -55,7 +56,7 @@ repositories {
     // See https://docs.gradle.org/current/userguide/declaring_repositories.html
     // for more information about repositories.
     mavenLocal()
-
+    google()
     maven ( url = "https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1" )
     maven ( url = "https://repo.hypixel.net/repository/Hypixel" )
 
@@ -63,6 +64,9 @@ repositories {
         name = "Modrinth"
     }
 }
+
+val bundled: Configuration by configurations.creating
+configurations.implementation { extendsFrom(bundled) }
 
 dependencies {
     // To change the versions see the gradle.properties file
@@ -80,6 +84,13 @@ dependencies {
     runtimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.2")
 
     implementation("maven.modrinth:odin:${project.property("odin_version")}")
+
+    bundled("androidx.compose.runtime:runtime-desktop:1.10.0") {
+        exclude("org.jetbrains.kotlin")
+        exclude("org.jetbrains.kotlinx", "kotlinx-coroutines-core")
+        exclude("org.jetbrains.kotlinx", "kotlinx-coroutines-core-jvm")
+    }
+
 }
 
 tasks.processResources {

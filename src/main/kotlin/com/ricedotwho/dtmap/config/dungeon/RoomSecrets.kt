@@ -4,8 +4,10 @@ import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.render.textDim
 import com.ricedotwho.dtmap.DtMap.zero
+import com.ricedotwho.dtmap.features.Condition
 import com.ricedotwho.dtmap.features.map.DungeonMap
 import com.ricedotwho.dtmap.utils.Colours
+import com.ricedotwho.dtmap.utils.dtHUD
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.network.chat.Component
 
@@ -15,14 +17,14 @@ object RoomSecrets : Module(
 ) {
     private val secretsRegex = Regex(".+§7(\\d+)/(\\d+) Secrets")
     private val hideActionBar by BooleanSetting("Hide from action bar", false, desc = "")
-    private val roomSecrets by HUD("Room Secrets", "") {
+    private val roomSecrets by dtHUD("Room Secrets", default = mutableListOf(Condition.CLEAR, Condition.ALT)) {
         if (it) {
             textDim("2/4", 0, 0, Colours.YELLOW)
         } else {
-            val room = DungeonMap.roomPlayerIn()?.owner ?: return@HUD zero
+            val room = DungeonMap.roomPlayerIn()?.owner ?: return@dtHUD zero
 
             val secretsInRoom = room.data!!.secrets
-            if (secretsInRoom == 0) return@HUD zero
+            if (secretsInRoom == 0) return@dtHUD zero
             val percent = room.secretsDone.toFloat() / secretsInRoom.toFloat()
             val color = when {
                 percent < 0.5f -> Colours.RED

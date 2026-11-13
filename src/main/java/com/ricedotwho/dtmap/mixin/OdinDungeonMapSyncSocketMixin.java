@@ -16,7 +16,7 @@ import java.io.Reader;
 @Mixin(targets = "com.odtheking.odin.features.impl.dungeon.map.DungeonMap$syncSocket$1$1")
 public class OdinDungeonMapSyncSocketMixin {
     @Inject(method = "invoke(Ljava/lang/String;)V", at = @At("HEAD"))
-    private void rsm$onOdinWSMessage(String message, CallbackInfo ci) {
+    private void dtMap$onOdinWSMessage(String message, CallbackInfo ci) {
         if (!MapConfig.INSTANCE.getOdinWS()) return;
         JsonElement object = JsonParser.parseReader(Reader.of(message));
         if (object == null || !object.isJsonObject()) return;

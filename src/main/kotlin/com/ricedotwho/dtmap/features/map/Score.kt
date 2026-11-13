@@ -1,6 +1,8 @@
 package com.ricedotwho.dtmap.features.map
 
 import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.utils.skyblock.Island
+import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener
 import com.ricedotwho.dtmap.DtMap.zero
 import com.ricedotwho.dtmap.config.dungeon.MapConfig
@@ -47,8 +49,8 @@ object Score {
         }
     }
 
-    fun actualRender(context: GuiGraphicsExtractor, example: Boolean): Pair<Int, Int> {
-        if (example) return example(context)
+    fun actualRender(context: GuiGraphicsExtractor): Pair<Int, Int> {
+        if (LocationUtils.currentArea != Island.Dungeon || DungeonListener.floor == null) return zero
         val totalSecrets = Scoreboard.stats.calculateTotalSecrets()
         val secrets = "§b${Scoreboard.stats.secretsFound}§7-§e${Scoreboard.stats.calculateMinimumSecrets()}§7-§c${totalSecrets}"
         val scoreText = "§${if (score < 270) "c" else if (score < 300) "e" else "a"}${score}"
@@ -86,6 +88,7 @@ object Score {
 
     fun render(context: GuiGraphicsExtractor, example: Boolean): Pair<Int, Int> {
         if (MapConfig.scoreCalculation != ScoreCalculation.STANDALONE) return zero
-        return actualRender(context, example)
+        if (example) return example(context)
+        return actualRender(context)
     }
 }

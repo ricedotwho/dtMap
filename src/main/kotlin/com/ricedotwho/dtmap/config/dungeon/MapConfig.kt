@@ -18,6 +18,7 @@ import com.odtheking.odin.utils.skyblock.Island
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.ricedotwho.dtmap.DtMap
 import com.ricedotwho.dtmap.DtMap.zero
+import com.ricedotwho.dtmap.features.Condition
 import com.ricedotwho.dtmap.features.Leap
 import com.ricedotwho.dtmap.features.PuzzleHud
 import com.ricedotwho.dtmap.features.SoloClear
@@ -30,6 +31,7 @@ import com.ricedotwho.dtmap.features.map.Scoreboard
 import com.ricedotwho.dtmap.utils.Colours
 import com.ricedotwho.dtmap.utils.DungeonMessages
 import com.ricedotwho.dtmap.utils.MapImageLoader
+import com.ricedotwho.dtmap.utils.dtHUD
 import net.minecraft.client.gui.components.PlayerFaceExtractor
 import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.resources.Identifier
@@ -62,15 +64,15 @@ object MapConfig : Module(
 
     // huds
 
-    val puzzleHud by HUD("dtPuzzle Hud", "") {
+    val puzzleHud by dtHUD("dtPuzzle Hud", default = mutableListOf(Condition.BEFORE_MORT, Condition.ALT)) {
         PuzzleHud.render(this, it)
     }
 
-    val map by HUD("dtMap", "") {
+    val map by dtHUD("dtMap", default = mutableListOf(Condition.BEFORE_MORT, Condition.ALT, Condition.CLEAR)) {
         MapRenderer.render(this, it)
     }
 
-    val score by HUD("dtScore", "") {
+    val score by dtHUD("dtScore", default = mutableListOf(Condition.CLEAR, Condition.ALT)) {
         Score.render(this, it)
     }
 
@@ -124,7 +126,7 @@ object MapConfig : Module(
 
     // render
 
-    val backgroundColour by ColorSetting("Background Colour", Color(0, 0, 0, 70F / 255F), desc = "")
+    val backgroundColour by ColorSetting("Background Colour", Color(0, 0, 0, 70F / 255F), allowAlpha = true, desc = "")
     val backgroundSize by NumberSetting("Background Size", 5F, 0..100, 0.25F, desc = "")
     val imageFolder by ActionSetting("Folder", desc = "") {
         Blaze3D.openPath(MapImageLoader.imagesPath)

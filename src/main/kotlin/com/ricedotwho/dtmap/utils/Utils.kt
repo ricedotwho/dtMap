@@ -2,11 +2,19 @@ package com.ricedotwho.dtmap.utils
 
 import com.mojang.blaze3d.vertex.PoseStack
 import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.clickgui.HudLayer
+import com.odtheking.odin.clickgui.settings.impl.HUDSetting
+import com.odtheking.odin.clickgui.settings.impl.HudElement
 import com.odtheking.odin.events.RenderExtractEvent
+import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.render.CustomRenderType
 import com.odtheking.odin.utils.render.PrimitiveRenderer
+import com.ricedotwho.dtmap.DtMap
+import com.ricedotwho.dtmap.features.Condition
+import com.ricedotwho.dtmap.utils.settings.MultiBoolSetting
 import net.fabricmc.fabric.api.client.rendering.v1.SubmitRenderPhases
+import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.renderer.SubmitNodeCollector
 import net.minecraft.client.renderer.rendertype.RenderType
 import net.minecraft.core.BlockPos
@@ -98,3 +106,54 @@ private fun RenderExtractEvent.submitGeometry(poseStack: PoseStack, renderType: 
     if (depth) return collector.submitCustomGeometry(poseStack, renderType, renderer)
     collector.submitCustom(SubmitRenderPhases.SEE_THROUGH_NAME_TAGS, NoDepthSubmit(poseStack.last().copy(), renderType, renderer))
 }
+
+fun Module.dtHUD(
+    name: String,
+    desc: String = "",
+    staticConditions: List<Condition> = mutableListOf(),
+    default: MutableList<Condition> = mutableListOf(),
+    availableConditions: MutableList<Condition> = Condition.entries.toMutableList(),
+    toggleable: Boolean = true,
+    x: Int = 10,
+    y: Int = 10,
+    scale: Float = 1f,
+    block: GuiGraphicsExtractor.(example: Boolean) -> Pair<Int, Int>
+): HUDSetting {
+    val element = HudElement(x, y, scale, !toggleable)
+    availableConditions.removeAll(staticConditions)
+    val conditions = +MultiBoolSetting("$name Conditions", Condition::class.java, default = default, options = availableConditions)
+    val realBlock: GuiGraphicsExtractor.(example: Boolean) -> Pair<Int, Int> = { example ->
+        if (example || staticConditions.any { it.predicate.invoke() } || conditions.value.any { it.predicate.invoke() }) {
+            this.block(example)
+        } else {
+            DtMap.zero
+        }
+    }
+    return HUDSetting(name, element, toggleable, desc, this) { example -> HudLayer.DrawnHudContent(element, example, realBlock) }
+}
+
+fun Color.lerp(other: Color, t: Float): Color {
+    return Color(
+        lerp(this.red, other.red, t),
+        lerp(this.blue, other.blue, t),
+        lerp(this.green, other.green, t)
+    )
+}
+
+fun Color.lerpAlpha(other: Color, t: Float): Color {
+    return Color(
+        lerp(this.red, other.red, t),
+        lerp(this.blue, other.blue, t),
+        lerp(this.green, other.green, t),
+        lerp(this.alphaFloat, other.alphaFloat, t)
+    )
+}
+
+fun lerp(a: Int, b: Int, t: Float): Int {
+    return (lerp(a.toFloat() / 255F, b.toFloat() / 255F, t) * 255).toInt()
+}
+
+fun lerp(a: Float, b: Float, t: Float): Float {
+    return a + (b - a) * t
+}
+
