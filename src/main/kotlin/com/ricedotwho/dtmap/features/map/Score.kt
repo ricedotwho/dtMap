@@ -5,8 +5,8 @@ import com.odtheking.odin.utils.skyblock.Island
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener
 import com.ricedotwho.dtmap.DtMap.zero
-import com.ricedotwho.dtmap.config.dungeon.MapConfig
-import com.ricedotwho.dtmap.config.dungeon.ScoreCalculation
+import com.ricedotwho.dtmap.config.MapConfig
+import com.ricedotwho.dtmap.config.ScoreCalculation
 import com.ricedotwho.dtmap.events.MapEvents
 import com.ricedotwho.dtmap.features.SoloClear
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents
@@ -54,7 +54,7 @@ object Score {
         val totalSecrets = Scoreboard.stats.calculateTotalSecrets()
         val secrets = "§b${Scoreboard.stats.secretsFound}§7-§e${Scoreboard.stats.calculateMinimumSecrets()}§7-§c${totalSecrets}"
         val scoreText = "§${if (score < 270) "c" else if (score < 300) "e" else "a"}${score}"
-        val showPrince = if (SoloClear.legit(MapConfig.legitMode)) Prince.legitPrince else Prince.cheaterPrince
+        val showPrince = if (SoloClear.legit()) Prince.legitPrince else Prince.cheaterPrince
 
         val unfoundSecrets = if (SoloClear.isSoloClearing() && totalSecrets != 0) {
             val unfoundSecrets = totalSecrets - foundSecretsCount

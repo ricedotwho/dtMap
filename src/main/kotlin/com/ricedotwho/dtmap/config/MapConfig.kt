@@ -1,4 +1,4 @@
-package com.ricedotwho.dtmap.config.dungeon
+package com.ricedotwho.dtmap.config
 
 import com.mojang.blaze3d.Blaze3D
 import com.odtheking.odin.clickgui.settings.RenderableSetting.Companion.withDependency
@@ -13,33 +13,20 @@ import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
-import com.odtheking.odin.utils.render.textDim
-import com.odtheking.odin.utils.skyblock.Island
-import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.ricedotwho.dtmap.DtMap
-import com.ricedotwho.dtmap.DtMap.zero
 import com.ricedotwho.dtmap.features.BloodRush
 import com.ricedotwho.dtmap.features.Condition
-import com.ricedotwho.dtmap.features.Leap
 import com.ricedotwho.dtmap.features.PuzzleHud
-import com.ricedotwho.dtmap.features.SoloClear
-import com.ricedotwho.dtmap.features.map.DungeonMap
 import com.ricedotwho.dtmap.features.map.MapRenderer
-import com.ricedotwho.dtmap.features.map.Room
-import com.ricedotwho.dtmap.features.map.Scan
 import com.ricedotwho.dtmap.features.map.Score
-import com.ricedotwho.dtmap.features.map.Scoreboard
 import com.ricedotwho.dtmap.utils.Colours
-import com.ricedotwho.dtmap.utils.DungeonMessages
 import com.ricedotwho.dtmap.utils.MapImageLoader
 import com.ricedotwho.dtmap.utils.dtHUD
-import net.minecraft.client.gui.components.PlayerFaceExtractor
-import net.minecraft.client.renderer.RenderPipelines
-import net.minecraft.resources.Identifier
 
 object MapConfig : Module(
     name = "dtMap",
-    description = "downtime map"
+    description = "downtime map",
+    category = DtMap.dtMapCat,
 ) {
 
     // settings

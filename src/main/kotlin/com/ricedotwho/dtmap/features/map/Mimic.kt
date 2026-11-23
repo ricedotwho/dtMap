@@ -6,7 +6,7 @@ import com.odtheking.odin.events.core.on
 import com.odtheking.odin.utils.render.drawFilledBox
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener
-import com.ricedotwho.dtmap.config.dungeon.EspConfig
+import com.ricedotwho.dtmap.config.EspConfig
 import com.ricedotwho.dtmap.utils.DungeonMessages
 import com.ricedotwho.dtmap.utils.box
 import com.ricedotwho.dtmap.utils.toAABB

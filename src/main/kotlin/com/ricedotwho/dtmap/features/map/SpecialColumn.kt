@@ -2,7 +2,7 @@ package com.ricedotwho.dtmap.features.map
 
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Color.Companion.darker
-import com.ricedotwho.dtmap.config.dungeon.MapConfig
+import com.ricedotwho.dtmap.config.MapConfig
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents
 
 // this is mostly used to track types of 1x1 rooms & whether the special column is fully scanned so we can mark the

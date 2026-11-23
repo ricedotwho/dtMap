@@ -11,6 +11,6 @@ enum class Condition(val predicate: () -> Boolean) {
     BOSS({ DungeonMessages.inBoss }),
     F7_BOSS({ DungeonMessages.inBoss && Scoreboard.floor.number == 7 }),
     CLEAR({ LocationUtils.currentArea == Island.Dungeon && (DungeonMessages.seenDungeonStart || Scoreboard.stats.elapsedTime != "0s") && !DungeonMessages.inBoss }),
-    BEFORE_MORT({  LocationUtils.currentArea == Island.Dungeon && (DungeonMessages.seenDungeonStart || Scoreboard.stats.elapsedTime != "0s") && !DungeonMessages.inBoss }),
+    BEFORE_MORT({ LocationUtils.currentArea == Island.Dungeon && !(DungeonMessages.seenDungeonStart || Scoreboard.stats.elapsedTime != "0s") && !DungeonMessages.inBoss }),
     ALT({ DtMap.keybindShowHud.isDown })
 }

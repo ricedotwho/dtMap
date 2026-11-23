@@ -3,10 +3,12 @@ package com.ricedotwho.dtmap.features.map
 import com.mojang.datafixers.util.Pair
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.OdinMod.scope
+import com.odtheking.odin.events.MessageEvent
+import com.odtheking.odin.events.core.EventBus
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.utils.Color
-import com.ricedotwho.dtmap.config.dungeon.AutoDE
-import com.ricedotwho.dtmap.config.dungeon.MapConfig
-import com.ricedotwho.dtmap.events.ChatEvents
+import com.ricedotwho.dtmap.config.AutoDE
+import com.ricedotwho.dtmap.config.MapConfig
 import com.ricedotwho.dtmap.features.SoloClear
 import com.ricedotwho.dtmap.features.map.DungeonMap.mapCenter
 import com.ricedotwho.dtmap.features.map.DungeonMap.roomSize
@@ -134,12 +136,12 @@ object Scoreboard {
             (Scan.blood != null && Scan.blood!!.state == Room.State.GREEN)
 
         fun calculateTotalSecrets(): Int =
-            if (Scan.loadedAllRooms && SoloClear.hack(!MapConfig.legitMode)) Scan.allSecrets
+            if (Scan.loadedAllRooms && SoloClear.hack()) Scan.allSecrets
             else if (secretsFound == 0 || secretsPercent == 0f) 0
             else floor(100 / secretsPercent * secretsFound + 0.5).toInt()
 
         fun calculateMaxBonusScore(): Int {
-            val princeMaxScore = if (SoloClear.legit(MapConfig.legitMode)) Prince.legitPrince else Prince.cheaterPrince
+            val princeMaxScore = if (SoloClear.legit()) Prince.legitPrince else Prince.cheaterPrince
             return 5 + (if (princeMaxScore) 1 else 0) + if (floor.number >= 6) 2 else 0
         }
 
@@ -218,6 +220,7 @@ object Scoreboard {
     var paul = false
 
     init {
+        EventBus.subscribe(this)
         ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register { _, _ ->
             dungeonTeammates.clear()
             dungeonTeammatesNoSelf = emptyList()
@@ -226,21 +229,21 @@ object Scoreboard {
             floor = Floor.Unknown
         }
 
-        ChatEvents.SYSTEM_MESSAGE_EVENT.register { (_, _, unformatted) ->
-            if (floor.number == -1) return@register
+        on<MessageEvent.Chat> {
+            if (floor.number == -1) return@on
 
-            if (princeRegex.matches(unformatted)) {
+            if (princeRegex.matches(message)) {
                 stats.princeKilled = true
-                return@register
+                return@on
             }
 
-            if (batRegex.matches(unformatted)) {
-                stats.bats.add(mc.player?.name?.string ?: return@register)
-                return@register
+            if (batRegex.matches(message)) {
+                stats.bats.add(mc.player?.name?.string ?: return@on)
+                return@on
             }
 
-            var match = partyMessageRegex.find(unformatted)
-            var name = match?.groupValues?.get(2)?.lowercase() ?: return@register
+            var match = partyMessageRegex.find(message)
+            var name = match?.groupValues?.get(2)?.lowercase() ?: return@on
             when (match.groupValues[3].lowercase()) {
                 "mimic killed", "mimic slain", "mimic killed!", "mimic dead", "mimic dead!", $$"$skytils-dungeon-score-mimic$" ->
                     stats.mimicKilled = true

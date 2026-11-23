@@ -1,8 +1,7 @@
 package com.ricedotwho.dtmap.features
 
 import com.odtheking.odin.OdinMod.mc
-import com.ricedotwho.dtmap.DtMap
-import com.ricedotwho.dtmap.config.dungeon.MapConfig
+import com.ricedotwho.dtmap.config.MapConfig
 import com.ricedotwho.dtmap.events.MapEvents
 import com.ricedotwho.dtmap.features.map.Room
 import com.ricedotwho.dtmap.utils.Chat

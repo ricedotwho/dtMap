@@ -2,7 +2,7 @@ package com.ricedotwho.dtmap.features.map
 
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Color.Companion.darker
-import com.ricedotwho.dtmap.config.dungeon.MapConfig
+import com.ricedotwho.dtmap.config.MapConfig
 import com.ricedotwho.dtmap.features.SoloClear
 import net.minecraft.client.gui.GuiGraphicsExtractor
 
@@ -88,7 +88,7 @@ class Door private constructor(val pos: Vec2i, var type: Type, val rooms: Mutabl
         }
 
         val noInfoColor = rooms.any { it.owner!!.state == Room.State.UNDISCOVERED || it.owner.state == Room.State.UNOPENED }
-        val legit = SoloClear.legit(MapConfig.legitMode)
+        val legit = SoloClear.legit()
         if (legit && noInfoColor) {
             return when (type) {
                 Type.BLOOD -> if (locked) MapConfig.bloodDoorColor.darker(MapConfig.darkenMultiplier) else MapConfig.bloodDoorColor

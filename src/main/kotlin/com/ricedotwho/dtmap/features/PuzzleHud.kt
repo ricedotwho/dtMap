@@ -6,7 +6,6 @@ import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.Island
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.ricedotwho.dtmap.DtMap.zero
-import com.ricedotwho.dtmap.config.dungeon.MapConfig.legitMode
 import com.ricedotwho.dtmap.features.map.Room
 import com.ricedotwho.dtmap.features.map.Scan
 import com.ricedotwho.dtmap.features.map.Scoreboard
@@ -28,7 +27,7 @@ object PuzzleHud {
 
             var undiscoveredPuzzleCount: Int
 
-            if (SoloClear.legit(legitMode)) {
+            if (SoloClear.legit()) {
                 Scoreboard.stats.puzzles.forEachIndexed { index, puzzle ->
                     val height = (index + 1) * (mc.font.lineHeight + 2)
 

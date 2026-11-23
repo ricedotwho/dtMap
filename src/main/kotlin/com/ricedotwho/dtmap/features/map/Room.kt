@@ -3,8 +3,8 @@ package com.ricedotwho.dtmap.features.map
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Color.Companion.darker
-import com.ricedotwho.dtmap.config.dungeon.MapConfig
-import com.ricedotwho.dtmap.config.dungeon.SoloClearConfig
+import com.ricedotwho.dtmap.config.MapConfig
+import com.ricedotwho.dtmap.config.SoloClearConfig
 import com.ricedotwho.dtmap.features.SoloClear
 import com.ricedotwho.dtmap.features.map.Scan.roomsList
 import com.ricedotwho.dtmap.utils.Colours
@@ -133,7 +133,7 @@ class Room(var type: Type, var shape: Shape, var data: RoomData? = null, var hei
     }
 
     private fun color(): Array<Color> {
-        val legit = SoloClear.legit(MapConfig.legitMode)
+        val legit = SoloClear.legit()
         if (legit && state == State.UNOPENED) {
             return if (isKnown1x1 && doors.count { it.seen } == 1) SpecialColumn.roomColorGuess(this)
             else if (type == Type.BLOOD) arrayOf(MapConfig.bloodRoomColor.darker(MapConfig.darkenMultiplier))
@@ -161,7 +161,7 @@ class Room(var type: Type, var shape: Shape, var data: RoomData? = null, var hei
     }
 
     fun render(context: GuiGraphicsExtractor) {
-        val legitMode = SoloClear.legit(MapConfig.legitMode)
+        val legitMode = SoloClear.legit()
         if (legitMode && state == State.UNDISCOVERED) return
 
         val matrices = context.pose()
@@ -240,8 +240,8 @@ class Room(var type: Type, var shape: Shape, var data: RoomData? = null, var hei
         val matrices = context.pose()
         val fontHeight = mc.font.lineHeight
 
-        if ((!SoloClearConfig.soloClearingOnlyShowCheckMark || !SoloClear.isSoloClearing()) && (!SoloClear.legit(
-                MapConfig.legitMode) || (state != State.UNDISCOVERED && state != State.UNOPENED)) && type != Type.FAIRY) {
+        if ((!SoloClearConfig.soloClearingOnlyShowCheckMark || !SoloClear.isSoloClearing()) && (!SoloClear.legit()
+                    || (state != State.UNDISCOVERED && state != State.UNOPENED)) && type != Type.FAIRY) {
             data?.name?.let { name ->
                 val splitName = name.split(" ").toMutableList()
 

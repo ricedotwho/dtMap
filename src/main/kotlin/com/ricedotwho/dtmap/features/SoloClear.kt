@@ -7,9 +7,10 @@ import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.skyblock.Island
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.ricedotwho.dtmap.DtMap
-import com.ricedotwho.dtmap.config.dungeon.EspConfig
-import com.ricedotwho.dtmap.config.dungeon.SoloClearConfig
-import com.ricedotwho.dtmap.config.dungeon.SoloClearing
+import com.ricedotwho.dtmap.config.EspConfig
+import com.ricedotwho.dtmap.config.MapConfig
+import com.ricedotwho.dtmap.config.SoloClearConfig
+import com.ricedotwho.dtmap.config.SoloClearing
 import com.ricedotwho.dtmap.events.MapEvents
 import com.ricedotwho.dtmap.features.map.Door
 import com.ricedotwho.dtmap.features.map.DoorEsp
@@ -32,17 +33,25 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 
 object SoloClear {
     fun isSoloClearing(): Boolean {
-        if (fuckCurrentMap) return false
-        if (SoloClearConfig.soloClearHudInsight && DtMap.keybindShowHud.isDown) return false
-        if ((SoloClearConfig.soloClearing == SoloClearing.AUTO && Scoreboard.dungeonTeammatesNoSelf.isEmpty()) || SoloClearConfig.soloClearing == SoloClearing.YES) return true
-        return false
+        if (fuckCurrentMap || insight()) return false
+        return solo()
     }
+
+    fun solo() =
+        SoloClearConfig.soloClearing == SoloClearing.YES || (SoloClearConfig.soloClearing == SoloClearing.AUTO && Scoreboard.dungeonTeammatesNoSelf.isEmpty())
+
+    fun insight() =
+        SoloClearConfig.soloClearHudInsight && DtMap.keybindShowHud.isDown
+
+    fun hack() =
+        (!isSoloClearing() && !MapConfig.legitMode) ||
+                (SoloClearConfig.soloClearCheaterInsight && solo() && insight())
 
     fun hack(bool: Boolean) =
         !isSoloClearing() && bool
 
-    fun legit(bool: Boolean) =
-        isSoloClearing() || bool
+    fun legit() =
+        (isSoloClearing() || MapConfig.legitMode) && !(SoloClearConfig.soloClearCheaterInsight && solo() && insight())
 
     fun register() {
         HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("dtm", "soloclearhud"), HudCallback)

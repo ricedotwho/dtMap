@@ -1,14 +1,13 @@
 package com.ricedotwho.dtmap
 
 import com.mojang.blaze3d.platform.InputConstants
-import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.config.ModuleConfig
+import com.odtheking.odin.features.Category
 import com.odtheking.odin.features.ModuleManager
-import com.odtheking.odin.utils.Color
-import com.ricedotwho.dtmap.config.dungeon.EspConfig
-import com.ricedotwho.dtmap.config.dungeon.MapConfig
-import com.ricedotwho.dtmap.config.dungeon.RoomSecrets
-import com.ricedotwho.dtmap.config.dungeon.SoloClearConfig
+import com.ricedotwho.dtmap.config.EspConfig
+import com.ricedotwho.dtmap.config.MapConfig
+import com.ricedotwho.dtmap.config.RoomSecrets
+import com.ricedotwho.dtmap.config.SoloClearConfig
 import com.ricedotwho.dtmap.features.*
 import com.ricedotwho.dtmap.features.map.DoorEsp
 import com.ricedotwho.dtmap.features.map.DungeonMap
@@ -22,13 +21,13 @@ import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper
 import net.minecraft.client.KeyMapping
-import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.resources.Identifier
 import org.slf4j.LoggerFactory
 
 object DtMap : ClientModInitializer {
     val LOGGER = LoggerFactory.getLogger("dtmap")
     val zero = 0 to 0
+    val dtMapCat = Category.custom("dtMap", 860, 10)
 
     lateinit var keybindShowHud: KeyMapping
 

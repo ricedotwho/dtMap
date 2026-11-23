@@ -1,8 +1,9 @@
-package com.ricedotwho.dtmap.config.dungeon
+package com.ricedotwho.dtmap.config
 
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.render.textDim
+import com.ricedotwho.dtmap.DtMap
 import com.ricedotwho.dtmap.DtMap.zero
 import com.ricedotwho.dtmap.features.Condition
 import com.ricedotwho.dtmap.features.map.DungeonMap
@@ -13,7 +14,8 @@ import net.minecraft.network.chat.Component
 
 object RoomSecrets : Module(
     name = "dtRoomSecrets",
-    description = "provided t ytouu by dtMi0"
+    description = "provided t ytouu by dtMi0",
+    category = DtMap.dtMapCat,
 ) {
     private val secretsRegex = Regex(".+§7(\\d+)/(\\d+) Secrets")
     private val hideActionBar by BooleanSetting("Hide from action bar", false, desc = "")

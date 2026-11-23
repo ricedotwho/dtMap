@@ -5,8 +5,8 @@ import com.odtheking.odin.utils.skyblock.Island
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.ricedotwho.dtmap.DtMap
 import com.ricedotwho.dtmap.DtMap.zero
-import com.ricedotwho.dtmap.config.dungeon.MapConfig
-import com.ricedotwho.dtmap.config.dungeon.ScoreCalculation
+import com.ricedotwho.dtmap.config.MapConfig
+import com.ricedotwho.dtmap.config.ScoreCalculation
 import com.ricedotwho.dtmap.features.Leap
 import com.ricedotwho.dtmap.features.SoloClear
 import com.ricedotwho.dtmap.utils.DungeonMessages
@@ -91,7 +91,7 @@ object MapRenderer {
 
             matrices.translate(MapConfig.backgroundSize, MapConfig.backgroundSize)
 
-            val legitMode = SoloClear.legit(MapConfig.legitMode)
+            val legitMode = SoloClear.legit()
 
             Scan.rooms.forEach { it.render(context) }
             Scan.doors.forEach {

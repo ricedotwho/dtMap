@@ -1,4 +1,4 @@
-package com.ricedotwho.dtmap.config.dungeon
+package com.ricedotwho.dtmap.config
 
 import com.odtheking.odin.clickgui.settings.AlwaysActive
 import com.odtheking.odin.clickgui.settings.RenderableSetting.Companion.withDependency
@@ -10,11 +10,13 @@ import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
+import com.ricedotwho.dtmap.DtMap
 
 @AlwaysActive
 object EspConfig : Module(
     name = "dtEsp",
-    description = "downtime esp"
+    description = "downtime esp",
+    category = DtMap.dtMapCat,
 ) {
     val doorEspCat by DropdownSetting("Door Esp", desc = "")
     val doorEsp by BooleanSetting("Door Esp Enabled", false, desc = "").withDependency { doorEspCat }

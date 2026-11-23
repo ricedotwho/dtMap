@@ -5,7 +5,7 @@ import com.odtheking.odin.events.RenderExtractEvent
 import com.odtheking.odin.events.core.EventBus
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.utils.render.drawWireFrameBox
-import com.ricedotwho.dtmap.config.dungeon.EspConfig
+import com.ricedotwho.dtmap.config.EspConfig
 import com.ricedotwho.dtmap.features.map.DungeonMap
 import com.ricedotwho.dtmap.features.map.Room
 import com.ricedotwho.dtmap.features.map.Scoreboard

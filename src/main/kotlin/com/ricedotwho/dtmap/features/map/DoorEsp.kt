@@ -7,8 +7,8 @@ import com.odtheking.odin.utils.render.drawFilledBox
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.skyblock.Island
 import com.odtheking.odin.utils.skyblock.LocationUtils
-import com.ricedotwho.dtmap.config.dungeon.EspConfig
-import com.ricedotwho.dtmap.config.dungeon.SoloClearConfig
+import com.ricedotwho.dtmap.config.EspConfig
+import com.ricedotwho.dtmap.config.SoloClearConfig
 import com.ricedotwho.dtmap.events.ChatEvents
 import com.ricedotwho.dtmap.features.SoloClear
 import com.ricedotwho.dtmap.utils.DungeonMessages

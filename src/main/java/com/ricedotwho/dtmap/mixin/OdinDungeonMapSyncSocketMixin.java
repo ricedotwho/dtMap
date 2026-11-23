@@ -2,7 +2,7 @@ package com.ricedotwho.dtmap.mixin;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.ricedotwho.dtmap.config.dungeon.MapConfig;
+import com.ricedotwho.dtmap.config.MapConfig;
 import com.ricedotwho.dtmap.features.map.Scan;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
